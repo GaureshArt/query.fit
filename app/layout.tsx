@@ -27,13 +27,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-<div className="absolute inset-0 -z-10 w-lvw h-lvh 
-  bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] 
-  bg-[length:calc(100%/6)_calc(100%/8)] 
-  md:bg-[length:calc(100%/12)_calc(100%/12)] 
-  bg-red-">
-    {children}
-</div>
+        <main
+          className="absolute inset-0 -z-10 w-lvw h-lvh 
+          bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] 
+          bg-[length:calc(100%/6)_calc(100%/8)] 
+          md:bg-[length:calc(100%/12)_calc(100%/12)] 
+          bg-red-"
+        >
+          {children}
+        </main>
       </body>
     </html>
   );
