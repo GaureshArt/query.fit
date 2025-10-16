@@ -3,6 +3,7 @@ import Eyebrow from "./eyebrow";
 import { HeroSectionData } from "@/constants/hero-section";
 import HeroHeading from "./hero-heading";
 import HeroSubheading from "./hero-subheading";
+import CtaButton from "./cta-button";
 
 export default function HeroSection() {
   return (
@@ -19,6 +20,7 @@ export default function HeroSection() {
           <Eyebrow className="col-span-full row-span-1 font-dosis " text={HeroSectionData.eyebrowText}/>
           <HeroHeading className="col-span-4 row-span-4 col-start-3 row-start-2 font-dosis"/>
           <HeroSubheading className="col-span-6 col-start-2 row-span-1 row-start-6 font-cutive-mono " text={HeroSectionData.subheading}/>
+          <CtaButton className="col-span-full row-span-1 row-start-7 font-cutive-mono" text={HeroSectionData.ctaPrimary}/>
         </div>
       </section>
     </>
