@@ -1,11 +1,12 @@
 import { cn } from "@/lib/utils";
 import Eyebrow from "./eyebrow";
 import { HeroSectionData } from "@/constants/hero-section";
+import HeroHeading from "./hero-heading";
 
 export default function HeroSection() {
   return (
     <>
-      <section className={cn("grid grid-cols-12 grid-rows-12 w-lvw h-lvh ")}>
+      <section className={cn("grid grid-cols-12 grid-rows-12 w-lvw h-lvh  ")}>
         <h1 id="hero-section-heading" className="sr-only">
           Query Fit Hero Section
         </h1>
@@ -15,7 +16,7 @@ export default function HeroSection() {
           )}
         >
           <Eyebrow className="col-span-full row-span-1 font-dosis " text={HeroSectionData.eyebrowText}/>
-
+          <HeroHeading className="col-span-4 row-span-4 col-start-3 row-start-2 font-dosis"/>
             
         </div>
       </section>
