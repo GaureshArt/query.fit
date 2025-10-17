@@ -8,13 +8,13 @@ interface IEyebrowProps {
 export default function Eyebrow({ text, className }: IEyebrowProps) {
   return (
     <div
-      className={cn("flex justify-center-safe items-center-safe", className)}
+      className={cn("flex justify-center-safe items-center-safe ", className)}
     >
       <h1 className="sr-only">Eyebrow Content - {text}</h1>
 
       <div
         className={cn(
-          "min-w-1/3 h-1/2 px-4 py-1 text-md  font-cutive-mono tracking-tighter text-shadow-2xs text-foreground  border rounded border-dashed border-accent flex items-center-safe justify-center gap-4 "
+          "min-w-1/3 h-1/2 px-4 py-1 text-md  font-cutive-mono tracking-tighter text-shadow-2xs text-foreground  border rounded-md border-white/20   flex items-center-safe justify-center gap-4 "
         )}
       >
         <span
