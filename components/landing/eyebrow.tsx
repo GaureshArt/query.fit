@@ -13,11 +13,12 @@ export default function Eyebrow({ text, className }: IEyebrowProps) {
 
       <div
         className={cn(
-          "flex items-center justify-center gap-3",
-          "px-4 py-1.5",
-          "font-cutive-mono tracking-wide text-foreground text-sm",
-          "border border-y-0  border-neutral-700",
-          "rounded-sm"
+          // "flex items-center justify-center gap-3",
+          // "px-4 py-1.5",
+          // "font-cutive-mono tracking-wide text-foreground text-sm",
+          // "border border-y-0  border-neutral-700",
+          // "rounded-sm"
+          "font-cutive-mono text-zinc-100/80 font-bold"
         )}
       >
         <span
