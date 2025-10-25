@@ -22,7 +22,7 @@ export default function HeroSection() {
             className="col-span-full row-span-1 font-dosis "
             text={HeroSectionData.eyebrowText}
           />
-          <HeroHeading className="col-span-4 row-span-4 col-start-3 row-start-2 font-dosis" />
+          <HeroHeading className="col-span-4 row-span-4 col-start-3 row-start-2 font-dosis" text={HeroSectionData.heroHeading}/>
           <HeroSubheading
             className="col-span-6 col-start-2 row-span-1 row-start-6 font-cutive-mono "
             text={HeroSectionData.subheading}
