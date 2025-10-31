@@ -1,4 +1,4 @@
-import CtaButton from "@/components/landing/cta-button";
+
 import { createClient } from "@/utils/supabase/server"
 
 export default async function Page(){
@@ -8,12 +8,20 @@ export default async function Page(){
         console.log(user.data)
         return <>
         user not log in
-        <CtaButton text="Log in"/>
+       
         </>
     }
+
+    const { data: subscription, error } = await supabase
+    .from('subscriptions')
+    .select('credits_remaining') 
+    .eq('user_id', user.data.user.id)    
+    .single();
     return (
         <>
         user log in {user.data.user.email}
+
+        user credits data: {subscription?.credits_remaining}
         </>
     )
 }
