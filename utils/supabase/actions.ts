@@ -26,17 +26,17 @@ export const signInWithGoogle = async () => {
   }
 };
 
-
-export const getUserData = async ()=>{
-  try{
+export const getUserData = async () => {
+  try {
     const supabase = await createClient();
-    const {data ,error} = await supabase.auth.getUser();
-    if(data.user){
-      return data.user
-    }else{
-      throw new Error("user information not found log in again")
+    const { data, error } = await supabase.auth.getUser();
+    if (data.user) {
+      return data.user;
+    } else {
+      return redirect("/");
     }
-  }catch(err){
-    throw err
+  } catch (err) {
+    throw err;
   }
-}
+};
+
