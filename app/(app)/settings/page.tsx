@@ -8,7 +8,6 @@ export default async function Page(){
         console.log(user.data)
         return <>
         user not log in
-       
         </>
     }
 
@@ -19,9 +18,12 @@ export default async function Page(){
     .single();
     return (
         <>
-        user log in {user.data.user.email}
 
+        <div className="bg-red-300">
+
+        user log in {user.data.user.email}
         user credits data: {subscription?.credits_remaining}
+        </div>
         </>
     )
 }
