@@ -17,11 +17,11 @@ import WorkspaceSvg from "@/public/app-svgs/workspace-svg";
 import DatabaseSvg from "@/public/app-svgs/database";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AiCreditsSvg from "@/public/app-svgs/ai-credits";
-import { createClient } from "@/utils/supabase/client";
-import Image from "next/image";
-import { type User } from "@supabase/supabase-js";
+
 import { APP_INFO } from "@/constants/app-section";
 import { cn } from "@/lib/utils";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getUserData } from "@/utils/supabase/actions";
 
 const data = {
   navMain: [
@@ -48,16 +48,14 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const supabase = createClient();
-  const [user, setUser] = React.useState<{ user: User } | { user: null }>();
-  React.useEffect(() => {
-    const getAvatarUrl = async () => {
-      const { data: user } = await supabase.auth.getUser();
 
-      setUser(user);
-    };
-    getAvatarUrl();
-  }, []);
+  
+  const {data:user,error,isLoading} = useQuery({
+    queryKey:['user','user-info'],
+    queryFn:getUserData,
+    
+  })
+  
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
@@ -78,14 +76,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         >
           <div className={cn("w-10 h-10 bg-zinc-200 rounded-lg")}>
             <Avatar className={cn("w-full h-full rounded-lg")}>
-              <AvatarImage src={user?.user?.user_metadata.avatar_url} />
+              <AvatarImage src={user?.user_metadata.avatar_url} />
               <AvatarFallback>
-                {user?.user?.user_metadata.name[0]}
+                {user?.user_metadata.name[0]}
               </AvatarFallback>
             </Avatar>
           </div>
           <div className="">
-            <h1>{user?.user?.user_metadata.name}</h1>
+            <h1>{user?.user_metadata.name}</h1>
             <h4 className={cn("text-zinc-500 text-[12px] inline-block")}>
               Free plan
               <span className="text-zinc-800">

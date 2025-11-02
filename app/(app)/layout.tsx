@@ -1,4 +1,3 @@
-
 import {
   SidebarInset,
   SidebarProvider,
@@ -8,15 +7,13 @@ import { AppSidebar } from "@/components/app/app-sidebar";
 
 import TanstackQueryProvider from "@/components/providers/tanstack-query-provider";
 
-
-
 export default async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-
+    <TanstackQueryProvider>
       <SidebarProvider className="font-cutive-mono">
         <AppSidebar />
         <SidebarInset>
@@ -26,11 +23,10 @@ export default async function Layout({
             </div>
           </header>
           <div className="flex flex-1 flex-col gap-4 px-4 py-2 bg-amber-100">
-            <TanstackQueryProvider>
-              {children}
-            </TanstackQueryProvider>
+            {children}
           </div>
         </SidebarInset>
       </SidebarProvider>
+    </TanstackQueryProvider>
   );
 }
