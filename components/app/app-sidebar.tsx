@@ -16,12 +16,12 @@ import DashboardSvg from "@/public/app-svgs/dashboard-svg";
 import WorkspaceSvg from "@/public/app-svgs/workspace-svg";
 import DatabaseSvg from "@/public/app-svgs/database";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import AiCreditsSvg from "@/public/app-svgs/ai-credits";
 
 import { APP_INFO } from "@/constants/app-section";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUserData } from "@/utils/supabase/actions";
+import { SubscriptionData } from "@/types/subscription.types";
 
 const data = {
   navMain: [
@@ -56,7 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     queryKey: ["user", "user-info"],
     queryFn: getUserData,
   });
-  const { data: planData } = useQuery({
+  const { data: planData} = useQuery<SubscriptionData , Error>({
     queryKey: ["user", "subscription-plan"],
     queryFn: async () => {
       const res = await fetch("/api/subscription");
@@ -67,11 +67,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   });
   return (
-    <Sidebar className="border-r-0" {...props}>
+    <Sidebar {...props}>
       <SidebarHeader>
-        <div className="w-full h-16 bg-zinc-100 flex items-center justify-items-start gap-4 rounded-lg border  px-1 py-2  border-b-zinc-300  border-r-zinc-300">
+        <div className={cn("w-full h-16 bg-zinc-100 flex items-center justify-items-start gap-4 rounded-lg border  px-1 py-2  border-b-zinc-300  border-r-zinc-300")}>
           <DatabaseSvg />
-          <h1 className="text-2xl font-bold tracking-tighter ">
+          <h1 className={cn("text-2xl font-bold tracking-tighter ")}>
             {APP_INFO.app_name}
           </h1>
         </div>
@@ -90,13 +90,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <AvatarFallback>{user?.user_metadata.name[0]}</AvatarFallback>
             </Avatar>
           </div>
-          <div className="">
+          <div className={cn("flex  flex-col items-baseline font-bold")}>
             <h1>{user?.user_metadata.name}</h1>
-            <h4 className={cn("text-zinc-500 text-[12px] inline-block")}>
-              Free plan
-              <span className="text-zinc-800">
-                <AiCreditsSvg /> 20
+            <h4 className={cn("text-muted-foreground text-[12px] inline-block")}>
+              {planData?.plan_type} plan
+              <span className={cn("text-sm ml-2 text-foreground/80 tracking-tighter ")}>
+                 {planData?.credits_remaining}
               </span>
+              <span className={cn("ml-1")}>credits</span>
             </h4>
           </div>
         </div>
