@@ -9,7 +9,7 @@ export default function HeroHeading({ className,text }: IHeroHeadingProps) {
     <div className={cn("px-4 py-2  ", className)}>
       <h1
         className={cn(
-          "text-foreground text-6xl/snug text-center font-bold"
+          "text-foreground text-[52px] text-center font-bold"
         )}
       >
         {text}

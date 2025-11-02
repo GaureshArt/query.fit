@@ -31,7 +31,7 @@ export default async function HeroSection() {
             text={HeroSectionData.eyebrowText}
           />
           <HeroHeading
-            className="col-span-4 row-span-4 col-start-3 row-start-2 font-dosis"
+            className="col-span-4 row-span-4 col-start-3 row-start-2 font-dosis "
             text={HeroSectionData.heroHeading}
           />
           <HeroSubheading
