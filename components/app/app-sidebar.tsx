@@ -48,14 +48,24 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-
-  
-  const {data:user,error,isLoading} = useQuery({
-    queryKey:['user','user-info'],
-    queryFn:getUserData,
-    
-  })
-  
+  const {
+    data: user,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["user", "user-info"],
+    queryFn: getUserData,
+  });
+  const { data: planData } = useQuery({
+    queryKey: ["user", "subscription-plan"],
+    queryFn: async () => {
+      const res = await fetch("/api/subscription");
+      if (!res.ok) {
+        throw new Error("Failed to fetch subscription");
+      }
+      return await res.json();
+    },
+  });
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
@@ -77,9 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className={cn("w-10 h-10 bg-zinc-200 rounded-lg")}>
             <Avatar className={cn("w-full h-full rounded-lg")}>
               <AvatarImage src={user?.user_metadata.avatar_url} />
-              <AvatarFallback>
-                {user?.user_metadata.name[0]}
-              </AvatarFallback>
+              <AvatarFallback>{user?.user_metadata.name[0]}</AvatarFallback>
             </Avatar>
           </div>
           <div className="">
@@ -87,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <h4 className={cn("text-zinc-500 text-[12px] inline-block")}>
               Free plan
               <span className="text-zinc-800">
-                <AiCreditsSvg /> 12/20
+                <AiCreditsSvg /> 20
               </span>
             </h4>
           </div>
