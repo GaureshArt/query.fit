@@ -1,0 +1,36 @@
+import type { Metadata } from "next";
+
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app/app-sidebar";
+
+
+
+export default function Layout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+
+
+      
+  return (
+   <SidebarProvider className="font-cutive-mono">
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2">
+          <div className="w-full  flex justify-between h-full items-center">
+            <SidebarTrigger />
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 px-4 py-2 bg-amber-100">
+          
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
