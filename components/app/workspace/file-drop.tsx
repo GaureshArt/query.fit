@@ -17,9 +17,11 @@ import PlusSvg from "@/components/shared/plus-svg";
 import UploadFileSvg from "@/public/app-svgs/upload-file-svg";
 import { useMutation } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
-import { error } from "console";
+
 import { Spinner } from "@/components/ui/spinner";
 import { useRef } from "react";
+import {  useRouter } from "next/navigation";
+
 export const uploadSchema = z.object({
   file: z
     .any()
@@ -40,6 +42,7 @@ export const uploadSchema = z.object({
 });
 
 export default function FileDrop() {
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<z.infer<typeof uploadSchema>>({
     resolver: zodResolver(uploadSchema),
@@ -71,6 +74,9 @@ export default function FileDrop() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+      console.log('data: ',data)
+      
+       router.push(`/workspace/query?session-id=${data.dbId}`)
     },
   });
 
