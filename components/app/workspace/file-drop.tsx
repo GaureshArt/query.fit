@@ -15,6 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PlusSvg from "@/components/shared/plus-svg";
 import UploadFileSvg from "@/public/app-svgs/upload-file-svg";
+import { useMutation } from "@tanstack/react-query";
+import { toast, Toaster } from "sonner";
+import { error } from "console";
 export const uploadSchema = z.object({
   file: z
     .any()
@@ -39,38 +42,79 @@ export default function FileDrop() {
     resolver: zodResolver(uploadSchema),
   });
 
+  const { mutate: uploadMutate } = useMutation({
+    mutationFn: async (data: z.infer<typeof uploadSchema>) => {
+      const formData = new FormData();
+      const file = data.file[0];
+      formData.append("file", file);
+      const res = await fetch(`/api/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        toast(`Something went wrong please try again! : ${(await res.json()).error}`);
+        throw new Error("file is not right")
+      }
+      return await res.json();
+    },
+    onSuccess(data) {
+      toast("File submitted!");
+    },
+  });
+
   function onSubmit(data: z.infer<typeof uploadSchema>) {
-    console.log("File submited")
-    console.log(data.file[0]);
+    console.log(data)
+    uploadMutate(data);
   }
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}  className={cn(" relative flex flex-col gap-4 border border-dashed px-8 py-4 font-cutive-mono")}>
-        <PlusSvg opacity={.1}/>
-      <Controller
-        name="file"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <Field>
-            <FieldContent>
-              <FieldLabel htmlFor={field.name} className={cn("font-bold text-xl")}><UploadFileSvg/> Database File</FieldLabel>
-              <FieldDescription>
-                Only .db, .sqlite and .csv files are allowed. (mximum 5MB size)
-              </FieldDescription>
-            </FieldContent>
-            <Input
-              accept=".db,.sqlite,.csv"
-              onChange={(e) => field.onChange(e.target.files)}
-              type="file"
-            aria-invalid={!!fieldState.error}
-              placeholder="Drag and drop file"
-            />
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
+    <>
+      <Toaster position="top-center" />
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn(
+          " relative flex flex-col gap-4 border border-dashed px-8 py-4 font-cutive-mono"
         )}
-      />
+      >
+        <PlusSvg opacity={0.1} />
+        <Controller
+          name="file"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldContent>
+                <FieldLabel
+                  htmlFor={field.name}
+                  className={cn("font-bold text-xl")}
+                >
+                  <UploadFileSvg /> Database File
+                </FieldLabel>
+                <FieldDescription>
+                  Only .db, .sqlite and .csv files are allowed. (maximum 5MB
+                  size)
+                </FieldDescription>
+              </FieldContent>
+              <Input
+                accept=".db,.sqlite,.csv"
+                onChange={(e) => field.onChange(e.target.files)}
+                type="file"
+                aria-invalid={!!fieldState.error}
+                placeholder="Drag and drop file"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
         <div>
-        <Button type="submit" variant={"default"} className={cn("cursor-pointer rounded-sm")}>Submit</Button>
+          <Button
+            type="submit"
+            variant={"default"}
+            className={cn("cursor-pointer rounded-sm")}
+          >
+            Submit
+          </Button>
         </div>
-    </form>
+      </form>
+    </>
   );
 }

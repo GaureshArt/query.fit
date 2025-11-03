@@ -1,0 +1,8 @@
+ignoredBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - sharp
+  - supabase
+  - unrs-resolver
+
+onlyBuiltDependencies:
+  - better-sqlite3
