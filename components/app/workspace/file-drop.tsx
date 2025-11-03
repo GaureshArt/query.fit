@@ -18,6 +18,8 @@ import UploadFileSvg from "@/public/app-svgs/upload-file-svg";
 import { useMutation } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
 import { error } from "console";
+import { Spinner } from "@/components/ui/spinner";
+import { useRef } from "react";
 export const uploadSchema = z.object({
   file: z
     .any()
@@ -38,11 +40,12 @@ export const uploadSchema = z.object({
 });
 
 export default function FileDrop() {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<z.infer<typeof uploadSchema>>({
     resolver: zodResolver(uploadSchema),
   });
 
-  const { mutate: uploadMutate } = useMutation({
+  const { mutate: uploadMutate, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof uploadSchema>) => {
       const formData = new FormData();
       const file = data.file[0];
@@ -53,23 +56,31 @@ export default function FileDrop() {
       });
 
       if (!res.ok) {
-        toast(`Something went wrong please try again! : ${(await res.json()).error}`);
-        throw new Error("file is not right")
+        toast.error(
+          `Something went wrong please try again! : ${(await res.json()).error}`
+        );
+        throw new Error("file is not right");
       }
       return await res.json();
     },
     onSuccess(data) {
-      toast("File submitted!");
+      toast.success("File submitted!", {
+        className: "border border-sm ",
+      });
+      form.reset();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     },
   });
 
   function onSubmit(data: z.infer<typeof uploadSchema>) {
-    console.log(data)
+    console.log(data);
     uploadMutate(data);
   }
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" richColors />
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
@@ -95,6 +106,7 @@ export default function FileDrop() {
                 </FieldDescription>
               </FieldContent>
               <Input
+               ref={fileInputRef}
                 accept=".db,.sqlite,.csv"
                 onChange={(e) => field.onChange(e.target.files)}
                 type="file"
@@ -107,10 +119,12 @@ export default function FileDrop() {
         />
         <div>
           <Button
+            disabled={isPending}
             type="submit"
             variant={"default"}
             className={cn("cursor-pointer rounded-sm")}
           >
+            {isPending && <Spinner />}
             Submit
           </Button>
         </div>
