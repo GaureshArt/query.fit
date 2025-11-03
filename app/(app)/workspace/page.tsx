@@ -1,6 +1,6 @@
 export default function Page(){
     return (
-        <div className="bg-red-500">
+        <div className="">
 
             Hellow Work space
         </div>

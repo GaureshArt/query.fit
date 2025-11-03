@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 
-
 interface IEyebrowProps {
   className?: string;
   text?: string;
@@ -22,7 +21,6 @@ export default function Eyebrow({ text, className }: IEyebrowProps) {
           className={cn("w-2 h-2 rounded-full bg-zinc-900  animate-pulse")}
         ></span>
         {text}
-        
       </div>
     </div>
   );
