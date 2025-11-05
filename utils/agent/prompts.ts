@@ -1,6 +1,6 @@
 import { SystemMessage } from "@langchain/core/messages";
 
-export const QUERY_EVALUATOR_SYSTEM_PROMPT = [
+export const INTENT_EVALUATOR_SYSTEM_PROMPT = [
   new SystemMessage(`You are a Query Evaluation AI. Your job is to analyze a user's natural language request and determine whether it is a read-only query or a data-manipulation request.
 
 Return ONLY:
