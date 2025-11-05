@@ -1,31 +1,43 @@
 import Database from "better-sqlite3";
-import { queryEvaluatorLlm, queryGeneratorLlm } from "./models";
+import { intentEvaluatorLlm, queryGeneratorLlm } from "./models";
 import { GraphState } from "./state";
 import { AIMessage } from "@langchain/core/messages";
 import path from "path";
 import os from "os";
 import {
-  QUERY_EVALUATOR_SYSTEM_PROMPT,
+  INTENT_EVALUATOR_SYSTEM_PROMPT,
   QUERY_GENERATOR_SYSTEM_PROMPT,
 } from "./prompts";
 import { Command, interrupt } from "@langchain/langgraph";
 
-export const queryEvaluator = async (state: GraphState) => {
-  const res = await queryEvaluatorLlm.invoke([
-    ...QUERY_EVALUATOR_SYSTEM_PROMPT,
+
+
+
+export const intentEvaluator = async (state: GraphState) => {
+  const res = await intentEvaluatorLlm.invoke([
+    ...INTENT_EVALUATOR_SYSTEM_PROMPT,
     ...state.messages,
   ]);
   if (res.isQueryReadOnly) {
-    return "checkSchema";
+    return {
+      routeDecision: "checkSchema",
+    };
   }
-  return "complexQueryApproval";
+  return {
+    routeDecision: "complexQueryApproval",
+  };
 };
 
 export const checkSchema = async (state: GraphState) => {
   if (state.schema) {
-    return "generateQuery";
+    return {
+      routeDecision: "generateQuery",
+    };
   }
-  return "generateSchema";
+
+  return {
+    routeDecision: "generateSchema",
+  };
 };
 
 export const generateSchema = async (state: GraphState) => {
@@ -109,7 +121,7 @@ export const executeQuery = async (state: GraphState) => {
   };
 };
 
-export const complexQueryApproval = (state: GraphState) => {
+export const complexQueryApproval = async (state: GraphState) => {
   const approved = interrupt(
     "Warning: This query appears to modify or delete data. Are you sure you want to proceed?"
   );
