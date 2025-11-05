@@ -6,7 +6,7 @@ const IQueryEvaluatorLlmSchema = z.object({
 const IQueryGeneratorLlmSchema = z.object({
   query: z.string(),
   isIncomplete:z.boolean(),
-  reasone:z.string()
+  reasone:z.string().describe("Explain user what need to make meaningful query and give proper reason for it.")
 });
 
 export const queryEvaluatorLlm = new ChatGoogleGenerativeAI({

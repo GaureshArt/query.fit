@@ -15,9 +15,8 @@ Be strict: when uncertain, assume potentially harmful → set 'isQueryReadOnly: 
 `),
 ];
 
-
 export const QUERY_GENERATOR_SYSTEM_PROMPT = [
-    new SystemMessage(`You are an expert SQLite Query Generation AI. Your job is to convert the user's natural language request into a SINGLE valid SQLite query.
+  new SystemMessage(`You are an expert SQLite Query Generation AI. Your job is to convert the user's natural language request into a SINGLE valid SQLite query.
 
 You must strictly follow this output contract:
 - query: the SQL query text OR an empty string if the query cannot be generated
@@ -48,12 +47,11 @@ Return ONLY the structured object fields:
 query: "<SQL or empty string>"
 isIncomplete: true/false
 reasone: "<short explanation>"
-`)
-]
-
+`),
+];
 
 export const QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT = [
-    new SystemMessage(`You are a Data Answer Summarization AI. Your task is to convert SQL query results into a clear natural-language answer for the user.
+  new SystemMessage(`You are a Data Answer Summarization AI. Your task is to convert SQL query results into a clear natural-language answer for the user.
 
 ### Your Responsibilities
 - Read the user's original question and the SQL result rows.
@@ -83,5 +81,5 @@ export const QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT = [
 
 ### Output Format
 Provide only a natural-language answer. No JSON, no code, no extra formatting.
-`)
-]
+`),
+];

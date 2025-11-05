@@ -12,6 +12,8 @@ export const graphState = z.object({
     schema: z.string().optional(),
     sqlQuery: z.string().optional(),
     queryResult: z.any().optional(),
+    routeDecision:z.string().optional(),
+    error:z.string().optional()
 })
 
 export type GraphState = z.infer<typeof graphState>;
