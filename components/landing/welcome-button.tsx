@@ -17,7 +17,7 @@ export default function WelcomeButton({className,text,iconSvg}:IWelcomeButtonPro
  <div className={cn("flex justify-center items-center gap-2", className)}>
       <Button
         variant={"outline"}
-        onClick={()=>redirect('/settings')}
+        onClick={()=>redirect('/workspace/data-drop')}
         className={cn("group px-2 py-1 cursor-pointer border-0  font-semibold  relative")}
       >
        {iconSvg}

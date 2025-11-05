@@ -9,10 +9,9 @@ import {
   intentEvaluator,
 } from "./nodes";
 
+const checkpointer = new MemorySaver();
 
-const checkpointer = new MemorySaver()
-
-const  QueryFitAgent = new StateGraph(graphState)
+const QueryFitAgent = new StateGraph(graphState)
   .addNode("intentEvaluator", intentEvaluator)
   .addNode("checkSchema", checkSchema)
   .addNode("generateSchema", generateSchema)
@@ -51,8 +50,7 @@ const  QueryFitAgent = new StateGraph(graphState)
       __end__: "__end__",
     }
   )
-  .addEdge("executeQuery","__end__")
-  .compile({checkpointer})
+  .addEdge("executeQuery", "__end__")
+  .compile({ checkpointer });
 
-
-  export default QueryFitAgent;
+export default QueryFitAgent;
