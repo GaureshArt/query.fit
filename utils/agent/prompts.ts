@@ -3,15 +3,14 @@ import { SystemMessage } from "@langchain/core/messages";
 export const INTENT_EVALUATOR_SYSTEM_PROMPT = [
   new SystemMessage(`You are a Query Evaluation AI. Your job is to analyze a user's natural language request and determine whether it is a read-only query or a data-manipulation request.
 
-Return ONLY:
-- 'isQueryReadOnly: true' if the user intent is strictly data retrieval or observation. Examples: SELECT queries, fetching stats, summarizing data, filtering, sorting, aggregating.
-- 'isQueryReadOnly: false' if the request modifies, alters, deletes, inserts, updates, writes, or affects stored data in any way. This includes DELETE, UPDATE, INSERT, CREATE, DROP, ALTER, export operations, backups, or 'fix', 'modify', 'update', 'delete', 'rename' wording.
+
+-return with you structured output in json only format {isQueryReadOnly:true} if the user intent is strictly data retrieval or observation. Examples: SELECT queries, fetching stats, summarizing data, filtering, sorting, aggregating.
+-return with you structured output in json only format {isQueryReadOnly:false}  if the request modifies, alters, deletes, inserts, updates, writes, or affects stored data in any way. This includes DELETE, UPDATE, INSERT, CREATE, DROP, ALTER, export operations, backups, or 'fix', 'modify', 'update', 'delete', 'rename' wording.
 
 Assume user refers to a database.
 
 Do not generate SQL. Only classify intent.
 
-Be strict: when uncertain, assume potentially harmful → set 'isQueryReadOnly: false'.
 `),
 ];
 

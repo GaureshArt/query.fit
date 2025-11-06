@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import { intentEvaluatorLlm, queryGeneratorLlm } from "./models";
 import { GraphState } from "./state";
-import { AIMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import path from "path";
 import os from "os";
 import {
@@ -73,6 +73,7 @@ export const generateSchema = async (state: GraphState) => {
 export const generateQuery = async (state: GraphState) => {
   const res = await queryGeneratorLlm.invoke([
     ...QUERY_GENERATOR_SYSTEM_PROMPT,
+    new HumanMessage(`the schema of database is ${state.schema}`),
     ...state.messages,
   ]);
   if (res.isIncomplete) {
@@ -117,6 +118,7 @@ export const executeQuery = async (state: GraphState) => {
 
   db.close();
   return {
+    messages:[new AIMessage(JSON.stringify(queryResult))],
     queryResult: queryResult,
   };
 };

@@ -51,6 +51,6 @@ const QueryFitAgent = new StateGraph(graphState)
     }
   )
   .addEdge("executeQuery", "__end__")
-  .compile({ checkpointer });
+  .compile({ checkpointer },);
 
 export default QueryFitAgent;
