@@ -11,10 +11,22 @@ import * as z from "zod";
 
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { GraphState } from "@/utils/agent/state";
-import { BaseMessage, HumanMessage } from "@langchain/core/messages";
+import { BaseMessage } from "@langchain/core/messages";
 import { useSearchParams } from "next/navigation";
-import { thread } from "@/utils/agent/thread";
-import { Response } from "@/components/ai-elements/response";
+
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { MessageSquareIcon } from "lucide-react";
+import {
+  Message,
+  MessageAvatar,
+  MessageContent,
+} from "@/components/ai-elements/message";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
   query: z.string().min(3, "Please enter proper query. At least 3 characters"),
@@ -23,7 +35,7 @@ const formSchema = z.object({
 export default function QueryInterface() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session-id");
-  const { submit, values } = useStream<GraphState>({
+  const { submit, values, isLoading } = useStream<GraphState>({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
@@ -49,20 +61,46 @@ export default function QueryInterface() {
   };
   return (
     <>
-      <div className="flex flex-col justify-center w-full md:w-4/5   border-zinc-300 ">
-        <div className="w-full h-full overflow-y-auto border border-red-300">
-          {values.messages?.map((message, ind) => (
-            <div key={ind}>
+      <div
+        className={cn(
+          "flex flex-col justify-center w-full md:w-4/5   border-zinc-300 "
+        )}
+      >
+        <div
+          className={cn(
+            "w-full  h-full overflow-y-auto ",
+            "px-4 py-2",
+            "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          )}
+        >
+          <Conversation className="relative size-full">
+            <ConversationContent>
+              {values.messages && values.messages.length === 0 ? (
+                <ConversationEmptyState
+                  description="Messages will appear here as the conversation progresses."
+                  icon={<MessageSquareIcon className="size-6" />}
+                  title="Start a conversation"
+                />
+              ) : (
+                values.messages &&
+                values.messages.map((message, index) => (
+                  <Message
+                    from={index % 2 === 0 ? "user" : "assistant"}
+                    key={index}
+                  >
+                    <MessageContent className={cn("", "font-semibold")}>
+                      {message.content as string}
+                    </MessageContent>
+                   
+                  </Message>
+                ))
+              )}
               {
-                <span className="bg-background p-2 rounded-full">
-                  {message.type}
-                </span>
+                isLoading ? <Spinner/>:""
               }
-              <div className="px-2 py-1 bg-green-50 text-green-500 border border-green-600">
-                <Response>{message.content as string}</Response>
-              </div>
-            </div>
-          ))}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
           {values.error && (
             <div className="border border-red-800 rounded px-2 py-1 bg-red-50 text-red-600">
               Erorr: {values.error}
