@@ -29,6 +29,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { DynamicTable } from "./dynamic-table";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Response } from "@/components/ai-elements/response";
 
 const formSchema = z.object({
   query: z.string().min(3, "Please enter proper query. At least 3 characters"),
@@ -41,6 +42,7 @@ export default function QueryInterface() {
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
+    
   });
   const { open: isSidebarOpen } = useSidebar();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -95,11 +97,14 @@ export default function QueryInterface() {
                         key={index}
                       >
                         <MessageContent className={cn("", "font-semibold")}>
+                          <Response >
                           {message.content as string}
+
+                          </Response>
                         </MessageContent>
                       </Message>
                     ))}
-
+                  {isLoading ? <Spinner /> : ""}
                   {values.queryResult && (
                     <Message from="queryresult" className=" ">
                       <MessageContent className=" w-full">
@@ -113,7 +118,7 @@ export default function QueryInterface() {
                   )}
                 </>
               )}
-              {isLoading ? <Spinner /> : ""}
+             
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>

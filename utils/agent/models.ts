@@ -23,8 +23,8 @@ export const queryGeneratorLlm = new ChatGoogleGenerativeAI({
 
 
 export const queryAnswerSummarizerLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-pro",
+  model: "gemini-2.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
   temperature: 0.3,
-  maxOutputTokens: 150,
+  maxOutputTokens:1000
 });
