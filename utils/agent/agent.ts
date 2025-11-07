@@ -7,8 +7,9 @@ import {
   generateQuery,
   generateSchema,
   intentEvaluator,
+  summarizeOutput,
 } from "./nodes";
-import { HumanMessage } from "@langchain/core/messages";
+
 
 const checkpointer = new MemorySaver();
 
@@ -18,6 +19,7 @@ const QueryFitAgent = new StateGraph(graphState)
   .addNode("generateSchema", generateSchema)
   .addNode("generateQuery", generateQuery)
   .addNode("executeQuery", executeQuery)
+  .addNode("summarizeOutput", summarizeOutput)
   .addNode("complexQueryApproval", complexQueryApproval, {
     ends: ["checkSchema", "__end__"],
   })
@@ -51,7 +53,8 @@ const QueryFitAgent = new StateGraph(graphState)
       __end__: "__end__",
     }
   )
-  .addEdge("executeQuery", "__end__")
+  .addEdge("executeQuery", "summarizeOutput")
+  .addEdge("summarizeOutput","__end__")
   .compile({ checkpointer },);
 
 export default QueryFitAgent;

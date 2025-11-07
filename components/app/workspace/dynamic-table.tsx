@@ -53,13 +53,13 @@ export function DynamicTable({ data, className }: DynamicTableProps) {
     
     <div
       className={cn(
-        "rounded-md border w-full max-w-full",
+        " w-full max-w-full",
         className,
         " [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       )}
     >
       <Table className="md  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <TableCaption>Query result</TableCaption>
+        {/* <TableCaption>Query result</TableCaption> */}
         <TableHeader className={cn("bg-foreground ")}>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
