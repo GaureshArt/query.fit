@@ -23,6 +23,7 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.76.1",
     "@tanstack/react-query": "^5.90.6",
+    "@tanstack/react-table": "^8.21.3",
     "ai": "^5.0.88",
     "better-sqlite3": "^12.4.1",
     "class-variance-authority": "^0.7.1",

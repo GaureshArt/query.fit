@@ -8,6 +8,7 @@ import {
   generateSchema,
   intentEvaluator,
 } from "./nodes";
+import { HumanMessage } from "@langchain/core/messages";
 
 const checkpointer = new MemorySaver();
 
@@ -54,3 +55,5 @@ const QueryFitAgent = new StateGraph(graphState)
   .compile({ checkpointer },);
 
 export default QueryFitAgent;
+
+

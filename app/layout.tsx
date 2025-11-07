@@ -47,7 +47,7 @@ export default function RootLayout({
           bg-[linear-gradient(to_right,rgba(0,0,0,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.08)_1px,transparent_1px)] 
           bg-[length:calc(100%/6)_calc(100%/8)] 
           md:bg-[length:calc(100%/12)_calc(100%/12)] 
-          bg-red-"
+          bg-red-    "
         >
           {children}
         </main>

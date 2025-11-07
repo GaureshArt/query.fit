@@ -9,19 +9,24 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps, HTMLAttributes } from "react";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
-  from: UIMessage["role"];
+  from: UIMessage["role"] | "queryresult";
 };
 
 export const Message = ({ className, from, ...props }: MessageProps) => (
   <div
     className={cn(
-      "group flex w-full items-end justify-end gap-2 py-4",
-      from === "user" ? "is-user" : "is-assistant flex-row-reverse justify-end",
+      "group flex w-full items-end gap-2 py-4",
+      from === "user"
+        ? "is-user justify-end"
+        : from === "queryresult"
+        ? "is-queryresult justify-start" 
+        : "is-assistant flex-row-reverse justify-end",
       className
     )}
     {...props}
   />
 );
+
 
 const messageContentVariants = cva(
   "is-user:dark flex flex-col gap-2 overflow-hidden rounded-lg text-sm",
@@ -29,13 +34,17 @@ const messageContentVariants = cva(
     variants: {
       variant: {
         contained: [
-          "max-w-[80%] px-4 py-3",
+          "px-4 py-3",
+          "group-[.is-queryresult]:w-[100%]",
+          "group-[.is-user]:max-w-[80%]",
+          "group-[.is-assistant]:max-w-[80%]",
           "group-[.is-user]:bg-zinc-100 group-[.is-user]:text-primary-background",
           "group-[.is-assistant]:bg-white group-[.is-assistant]:text-foreground",
         ],
         flat: [
           "group-[.is-user]:max-w-[80%] group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
           "group-[.is-assistant]:text-foreground",
+            "group-[.is-queryresult]:w-[100%]",
         ],
       },
     },
