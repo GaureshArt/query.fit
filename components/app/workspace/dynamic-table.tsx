@@ -29,7 +29,7 @@ interface DynamicTableProps {
 
 export function DynamicTable({ data, className }: DynamicTableProps) {
   const columns = React.useMemo<ColumnDef<Record<string, any>>[]>(() => {
-    if (data.length === 0) return [];
+    if (data.length === 0 || !(data instanceof Array)) return [];
     const keys = Object.keys(data[0]);
     return keys.map((key) => ({
       accessorKey: key,
