@@ -31,6 +31,14 @@ import { DynamicTable } from "./dynamic-table";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Response } from "@/components/ai-elements/response";
 
+import {
+  SlideToUnlock,
+  SlideToUnlockHandle,
+  SlideToUnlockText,
+  SlideToUnlockTrack,
+} from "@/components/external-ui/slide-to-unlock";
+import { ShimmeringText } from "@/components/external-ui/shimmering-text";
+
 const formSchema = z.object({
   query: z.string().min(3, "Please enter proper query. At least 3 characters"),
 });
@@ -38,11 +46,10 @@ const formSchema = z.object({
 export default function QueryInterface() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session-id");
-  const { submit, values, isLoading } = useStream<GraphState>({
+  const { submit, values, isLoading, interrupt } = useStream<GraphState>({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
-    
   });
   const { open: isSidebarOpen } = useSidebar();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,14 +104,50 @@ export default function QueryInterface() {
                         key={index}
                       >
                         <MessageContent className={cn("", "font-semibold")}>
-                          <Response >
-                          {message.content as string}
-
-                          </Response>
+                          <Response>{message.content as string}</Response>
                         </MessageContent>
                       </Message>
                     ))}
                   {isLoading ? <Spinner /> : ""}
+                  {interrupt && (
+                    <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
+                        {interrupt.value as string}
+                      <div className="flex gap-4">
+
+                        <SlideToUnlock
+                        className=" w-70 h-10 rounded-md"
+                          onUnlock={() => {
+                            submit(undefined, {
+                              command: { resume: { shouldContinue: true } },
+                            });
+                          }}
+                        >
+                          <SlideToUnlockTrack className="">
+                            <SlideToUnlockText className=" ">
+                              {({ isDragging }) => (
+                                <ShimmeringText
+                                  text="slide to confirm"
+                                  isStopped={isDragging}
+                                />
+                              )}
+                            </SlideToUnlockText>
+                            <SlideToUnlockHandle className="h-8"/>
+                          </SlideToUnlockTrack>
+                        </SlideToUnlock>
+                        <Button
+                        className={cn("font-semibold cursor-pointer")}
+                          variant={"secondary"}
+                          onClick={() => {
+                            submit(undefined, {
+                              command: { resume: { shouldContinue: false } },
+                            });
+                          }}
+                        >
+                          Stop
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   {values.queryResult && (
                     <Message from="queryresult" className=" ">
                       <MessageContent className=" w-full">
@@ -118,7 +161,6 @@ export default function QueryInterface() {
                   )}
                 </>
               )}
-             
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>
@@ -130,8 +172,12 @@ export default function QueryInterface() {
             isSidebarOpen ? "w-4/5" : "w-full"
           )}
         >
-     
-          <div className={cn("w-full md:w-4/6   rounded-xl md:px-6 py-4",isSidebarOpen?"md:w-4/6":"")}>
+          <div
+            className={cn(
+              "w-full md:w-4/6   rounded-xl md:px-6 py-4",
+              isSidebarOpen ? "md:w-4/6" : ""
+            )}
+          >
             <Toaster position="top-center" richColors />
             <form
               onSubmit={form.handleSubmit(onSubmit)}

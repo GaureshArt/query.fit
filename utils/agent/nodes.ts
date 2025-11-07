@@ -135,7 +135,7 @@ export const complexQueryApproval = async (state: GraphState) => {
   const approved = interrupt(
     "Warning: This query appears to modify or delete data. Are you sure you want to proceed?"
   );
-  if (approved) {
+  if (approved.shouldContinue) {
     return new Command({
       update: {
         routeDecision: "checkSchema",
