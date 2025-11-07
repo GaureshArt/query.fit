@@ -27,6 +27,8 @@ import {
   MessageContent,
 } from "@/components/ai-elements/message";
 import { Spinner } from "@/components/ui/spinner";
+import { DynamicTable } from "./dynamic-table";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const formSchema = z.object({
   query: z.string().min(3, "Please enter proper query. At least 3 characters"),
@@ -40,7 +42,7 @@ export default function QueryInterface() {
     assistantId: "agent",
     messagesKey: "messages",
   });
-
+  const { open: isSidebarOpen } = useSidebar();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,18 +65,20 @@ export default function QueryInterface() {
     <>
       <div
         className={cn(
-          "flex flex-col justify-center w-full md:w-4/5   border-zinc-300 "
+          "flex flex-col justify-center w-full  md:w-4/5 border-zinc-300  ",
+          "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         )}
       >
         <div
           className={cn(
-            "w-full  h-full overflow-y-auto ",
-            "px-4 py-2",
+            " h-full max-w-full overflow-hidden",
+            " py-2",
+            isSidebarOpen ? "w-4/5" : "w-full",
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           )}
         >
-          <Conversation className="relative size-full">
-            <ConversationContent>
+          <Conversation>
+            <ConversationContent className="w-auto max-w-full">
               {values.messages && values.messages.length === 0 ? (
                 <ConversationEmptyState
                   description="Messages will appear here as the conversation progresses."
@@ -82,49 +86,51 @@ export default function QueryInterface() {
                   title="Start a conversation"
                 />
               ) : (
-                values.messages &&
-                values.messages.map((message, index) => (
-                  <Message
-                    from={index % 2 === 0 ? "user" : "assistant"}
-                    key={index}
-                  >
-                    <MessageContent className={cn("", "font-semibold")}>
-                      {message.content as string}
-                    </MessageContent>
-                   
-                  </Message>
-                ))
+                <>
+                  {values.messages &&
+                    values.messages.map((message, index) => (
+                      <Message
+                        className=" mb-2"
+                        from={message.type === "human" ? "user" : "assistant"}
+                        key={index}
+                      >
+                        <MessageContent className={cn("", "font-semibold")}>
+                          {message.content as string}
+                        </MessageContent>
+                      </Message>
+                    ))}
+
+                  {values.queryResult && (
+                    <Message from="queryresult" className=" ">
+                      <MessageContent className=" w-full">
+                        <p className="font-semibold ">Query Result:</p>
+
+                        <div className="w-full  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          <DynamicTable data={values.queryResult} />
+                        </div>
+                      </MessageContent>
+                    </Message>
+                  )}
+                </>
               )}
-              {
-                isLoading ? <Spinner/>:""
-              }
+              {isLoading ? <Spinner /> : ""}
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>
-          {values.error && (
-            <div className="border border-red-800 rounded px-2 py-1 bg-red-50 text-red-600">
-              Erorr: {values.error}
-            </div>
-          )}
-          {values.queryResult && (
-            <div>
-              queryResult:
-              <div className="bg-orange-50 border border-orange-700 px-2 py-1 rounded text-orangeg-500">
-                {JSON.stringify(values.queryResult)}
-              </div>
-            </div>
-          )}
         </div>
+
         <div
           className={cn(
-            "w-full bg-background flex justify-center sticky  bottom-0"
+            " bg-background flex flex-col justify-center sticky items-center  bottom-0",
+            isSidebarOpen ? "w-4/5" : "w-full"
           )}
         >
-          <div className={cn("w-full md:w-4/6   rounded-xl md:px-6 py-4")}>
+     
+          <div className={cn("w-full md:w-4/6   rounded-xl md:px-6 py-4",isSidebarOpen?"md:w-4/6":"")}>
             <Toaster position="top-center" richColors />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="relative w-full border-none"
+              className="relative w-full  border-none"
             >
               <Controller
                 name="query"

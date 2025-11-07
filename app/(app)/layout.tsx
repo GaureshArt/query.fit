@@ -15,8 +15,8 @@ export default async function Layout({
   return (
     <TanstackQueryProvider>
       <SidebarProvider className="font-cutive-mono">
-        <AppSidebar />
-        <SidebarInset>
+      <AppSidebar  />
+        <SidebarInset className="">
           <header className="flex h-14 shrink-0 items-center gap-2">
             <div className="w-full  flex justify-between h-full items-center">
               <SidebarTrigger />
