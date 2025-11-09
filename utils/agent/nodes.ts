@@ -125,12 +125,11 @@ export const executeQuery = async (state: GraphState) => {
 
 
 export const summarizeOutput = async (state:GraphState)=>{
-  const res = await queryAnswerSummarizerLlm.invoke([...QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,...state.messages,new AIMessage(`THis is query result: ${JSON.stringify(state.queryResult)}`)])
+  const res = await queryAnswerSummarizerLlm.invoke([...QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,...state.messages,new AIMessage(`This is query result: ${JSON.stringify(state.queryResult)}`)])
    return {
-    messages:[new AIMessage(res.content)]
+    messages:[new AIMessage(res.output)]
   };
 }
-
 export const complexQueryApproval = async (state: GraphState) => {
   const approved = interrupt(
     "Warning: This query appears to modify or delete data. Are you sure you want to proceed?"

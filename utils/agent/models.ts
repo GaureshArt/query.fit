@@ -9,6 +9,9 @@ const IQueryGeneratorLlmSchema = z.object({
   reasone:z.string().describe("Explain user what need to make meaningful query and give proper reason for it.")
 });
 
+const ISummarizerLlmSchema = z.object({
+  output:z.string().describe("This is summarize output of the given query output")
+})
 export const intentEvaluatorLlm = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
@@ -17,6 +20,7 @@ export const intentEvaluatorLlm = new ChatGoogleGenerativeAI({
 
 export const queryGeneratorLlm = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
+  outputVersion:"v1",
   apiKey: process.env.GOOGLE_API_KEY,
   temperature: 0.3,
   
@@ -27,5 +31,5 @@ export const queryAnswerSummarizerLlm = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
   temperature: 0.3,
-  
-});
+   
+}).withStructuredOutput(ISummarizerLlmSchema);
