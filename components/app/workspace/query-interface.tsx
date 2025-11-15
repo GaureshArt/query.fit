@@ -159,6 +159,24 @@ export default function QueryInterface() {
                       </MessageContent>
                     </Message>
                   )}
+
+
+                  {
+                    values.queryPlan &&(
+                      <Message from="assistant" className=" overflow-auto">
+                      <MessageContent className=" w-full">
+                        <p className="font-semibold ">Query Result:</p>
+
+                        {/* <div className="w-full  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"> */}
+                          {/* <code> */}
+                          <Response>{JSON.stringify(values.queryPlan)}</Response>
+                            
+                          {/* </code> */}
+                        {/* </div> */}
+                      </MessageContent>
+                    </Message>
+                    )
+                  }
                 </>
               )}
             </ConversationContent>

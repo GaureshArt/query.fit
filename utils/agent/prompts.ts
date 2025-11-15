@@ -1,5 +1,5 @@
 import { SystemMessage } from "@langchain/core/messages";
-
+import { PromptTemplate } from "@langchain/core/prompts";
 export const INTENT_EVALUATOR_SYSTEM_PROMPT = [
   new SystemMessage(`You are a Query Evaluation AI. Your job is to analyze a user's natural language request and determine whether it is a read-only query or a data-manipulation request.
 
@@ -81,4 +81,77 @@ export const QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT = [
 ### Output Format
 Provide only a natural-language answer. No JSON, no code, no extra formatting.
 `),
+];
+
+export const CHART_GENERATOR_PROMPT = PromptTemplate.fromTemplate(
+  `You are a Vega-Lite charting expert.
+  You are given this data: {data}
+  And this user request: {request}
+  Generate a valid Vega-Lite JSON spec for this chart.
+  Do NOT include the 'data' key. Do NOT include a 'config' key.
+  Only return the raw JSON spec.`
+);
+
+export const QUERY_PLANNER_PROMPT = [
+  new SystemMessage(
+    
+  `You are the Query Planner for a database AI agent. 
+Analyze the user query and return a JSON execution plan following the structured output schema.
+
+INTENT TYPES:
+- general: greetings/meta questions
+- retrieval: read-only SQL
+- manipulation: write SQL (update/delete/insert)
+- analytical: visualizations charts, graphs
+- multi-step: multiple operations required
+
+TOOLS:
+- general_chat
+- schema_inspector
+- sql_executor
+- approval_handler
+- data_validator
+- chart_generator
+
+RULES:
+1. Output ONLY valid JSON matching the schema.
+2. For write operations: include a preview step + approval_handler.
+3. Steps must be in order and must explain WHY the tool is needed.
+4. If query is unclear, include one step asking user for clarification using general_chat.
+5. If SQL query need to be use meaning retreival and manipulation or multistep with theminclude then must check first if scehma is available or not usign schema_inspector
+6. Before sql_executor must need to generate sql query so use sql_generator
+7. Do NOT output SQL here—only tool steps.
+
+EXAMPLES:
+
+Query: "Who are you?"
+{
+  "intent": "general",
+  "steps": [
+    { "tool_name": "general_chat", "description": "Respond with agent info" }
+  ]
+}
+
+Query: "Show highest paying customers"
+{
+  "intent": "retrieval",
+  "steps": [
+    { "tool_name": "schema_inspector", "description": "Check revenue column" },
+    { "tool_name": "sql_executor", "description": "Query highest paying customers" }
+  ]
+}
+
+Query: "Delete inactive users"
+{
+  "intent": "manipulation",
+  "steps": [
+    { "tool_name": "sql_executor", "description": "Preview rows for deletion" },
+    { "tool_name": "approval_handler", "description": "Request approval" },
+    { "tool_name": "sql_executor", "description": "Execute delete after approval" }
+  ]
+}
+
+Now create the execution plan as JSON only.
+`
+  ),
 ];
