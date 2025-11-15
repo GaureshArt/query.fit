@@ -1,18 +1,28 @@
 import Database from "better-sqlite3";
-import { intentEvaluatorLlm, queryAnswerSummarizerLlm, queryGeneratorLlm } from "./models";
+import {
+  chartGeneratorLlm,
+  intentEvaluatorLlm,
+  queryAnswerSummarizerLlm,
+  queryGeneratorLlm,
+  queryPlannerLlm,
+  queryPlannerLlmSchema,
+} from "./models";
 import { GraphState } from "./state";
-import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
 import path from "path";
 import os from "os";
 import {
+  CHART_GENERATOR_PROMPT,
   INTENT_EVALUATOR_SYSTEM_PROMPT,
   QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,
   QUERY_GENERATOR_SYSTEM_PROMPT,
+  QUERY_PLANNER_PROMPT,
 } from "./prompts";
 import { Command, Graph, interrupt } from "@langchain/langgraph";
-
-
-
 
 export const intentEvaluator = async (state: GraphState) => {
   const res = await intentEvaluatorLlm.invoke([
@@ -123,13 +133,16 @@ export const executeQuery = async (state: GraphState) => {
   };
 };
 
-
-export const summarizeOutput = async (state:GraphState)=>{
-  const res = await queryAnswerSummarizerLlm.invoke([...QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,...state.messages,new AIMessage(`This is query result: ${JSON.stringify(state.queryResult)}`)])
-   return {
-    messages:[new AIMessage(res.output)]
+export const summarizeOutput = async (state: GraphState) => {
+  const res = await queryAnswerSummarizerLlm.invoke([
+    ...QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,
+    ...state.messages,
+    new AIMessage(`This is query result: ${JSON.stringify(state.queryResult)}`),
+  ]);
+  return {
+    messages: [new AIMessage(res.output)],
   };
-}
+};
 export const complexQueryApproval = async (state: GraphState) => {
   const approved = interrupt(
     "Warning: This query appears to modify or delete data. Are you sure you want to proceed?"
@@ -154,3 +167,59 @@ export const complexQueryApproval = async (state: GraphState) => {
     goto: "__end__",
   });
 };
+
+export const generateChartData = async (state: GraphState) => {
+  try {
+    const { messages, queryResult } = state;
+
+    if (!queryResult || queryResult.length === 0) {
+      return { error: "No data available to generate a chart." };
+    }
+    const question = messages.at(-1)?.content as string;
+    if (!question) {
+      return { error: "No user question found in history." };
+    }
+    const dataSample = queryResult.slice(0, 10);
+    const formattedPrompt = await CHART_GENERATOR_PROMPT.format({
+      data: JSON.stringify(dataSample),
+      request: question,
+    });
+    const res = await chartGeneratorLlm.invoke(formattedPrompt);
+    const content = res.content as string;
+    let chartSpec: object;
+    try {
+      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```|({[\s\S]*})/);
+      if (!jsonMatch) {
+        throw new Error("No valid JSON object found in the LLM response.");
+      }
+      const jsonString = jsonMatch[1] ?? jsonMatch[0];
+      chartSpec = JSON.parse(jsonString);
+    } catch (parseError: any) {
+      console.error("Failed to parse chart spec:", content, parseError);
+      return {
+        error: `The AI returned an invalid chart format. ${parseError.message}`,
+      };
+    }
+    return {
+      chartSpec: chartSpec,
+    };
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return { error: `Failed to generate chart: ${err.message}` };
+    }
+    return { error: "An unknown error occurred while generating the chart." };
+  }
+};
+
+
+
+
+export const queryPlanner = async (state:GraphState)=>{
+  const lastMessage = state.messages.at(-1) as HumanMessage
+  const res = await queryPlannerLlm.invoke([...QUERY_PLANNER_PROMPT,new HumanMessage(lastMessage?.content)]) 
+  return {
+    queryPlan:res,
+    routeDecision:"orchastrator"
+  }
+}
+
