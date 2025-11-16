@@ -174,6 +174,8 @@ export const executeQuery = async (
     routeDecision: "orchestrator",
   };
 };
+
+
 export const summarizeOutput = async (
   state: GraphState
 ): Promise<Partial<GraphState>> => {
@@ -187,7 +189,7 @@ export const summarizeOutput = async (
   return {
     messages: [new AIMessage(res.output)],
     answeredQuery: true,
-    routeDecision: "orchestrator",
+    routeDecision: "__end__",
   };
 };
 export const complexQueryApproval = async (state: GraphState) => {
@@ -215,9 +217,14 @@ export const queryPlanner = async (
   state: GraphState
 ): Promise<Partial<GraphState>> => {
   const lastMessage = state.messages.at(-1) as HumanMessage;
+  const prompt = await QUERY_PLANNER_PROMPT.format({
+    userMessage:lastMessage.content,
+    schema:state.schema,
+    toolList:TOOL_REGISTRY
+  })
   const res = await queryPlannerLlm.invoke([
-    ...QUERY_PLANNER_PROMPT,
-    new HumanMessage(lastMessage?.content),
+    new SystemMessage(prompt),
+    ...state.messages
   ]);
   return {
     queryPlan: res,
@@ -252,7 +259,7 @@ export const validator = async (state:GraphState): Promise<Partial<GraphState>> 
     schema:state.schema,
     userQuery:state.messages.at(-1)?.content
   })
-  const res = await validatorLlm.invoke([new SystemMessage(prompt)])
+  const res = await validatorLlm.invoke([new SystemMessage(prompt),...state.messages])
 
   return {
     feedback:res.feedback,
@@ -273,6 +280,7 @@ export const orchestrator = async (
     feedback:state.feedback,
     userQuery:state.messages.at(-1)?.content,
     toolList:JSON.stringify(TOOL_REGISTRY),
+    needsReplanning:state.needsReplanning
   });
   const res = await queryOrchestratorLlm.invoke([new SystemMessage(prompt),...state.messages]);
 
