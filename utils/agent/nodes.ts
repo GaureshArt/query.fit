@@ -1,11 +1,15 @@
 import Database from "better-sqlite3";
 import {
   chartGeneratorLlm,
-  intentEvaluatorLlm,
+  generalChatLlm,
+  
   queryAnswerSummarizerLlm,
+  queryClarifierLlm,
   queryGeneratorLlm,
+  queryOrchestratorLlm,
   queryPlannerLlm,
   queryPlannerLlmSchema,
+  validatorLlm,
 } from "./models";
 import { GraphState } from "./state";
 import {
@@ -17,44 +21,32 @@ import path from "path";
 import os from "os";
 import {
   CHART_GENERATOR_PROMPT,
-  INTENT_EVALUATOR_SYSTEM_PROMPT,
+  GENERAL_CHAT_PROMPT,
   QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,
+  QUERY_CLARIFIER_PROMPT,
   QUERY_GENERATOR_SYSTEM_PROMPT,
+  QUERY_ORCHESTRATOR_PROMPT,
   QUERY_PLANNER_PROMPT,
+  VALIDATOR_PROMPT,
 } from "./prompts";
-import { Command, Graph, interrupt } from "@langchain/langgraph";
+import { Command,  interrupt } from "@langchain/langgraph";
+import { TOOL_REGISTRY } from "./toolsInfo";
 
-export const intentEvaluator = async (state: GraphState) => {
-  const res = await intentEvaluatorLlm.invoke([
-    ...INTENT_EVALUATOR_SYSTEM_PROMPT,
-    ...state.messages,
-  ]);
-  if (res.isQueryReadOnly) {
-    return {
-      routeDecision: "checkSchema",
-    };
-  }
-  return {
-    routeDecision: "complexQueryApproval",
-  };
-};
 
-export const checkSchema = async (state: GraphState) => {
+
+export const generateSchema = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
   if (state.schema) {
     return {
-      routeDecision: "generateQuery",
+      feedback:"schema is already generated",
+      routeDecision: "orchestrator",
     };
   }
-
-  return {
-    routeDecision: "generateSchema",
-  };
-};
-
-export const generateSchema = async (state: GraphState) => {
   if (!state.dbId) {
     return {
-      error: "Database path is missing. Cannot generate schema.",
+      lastError: "Database path is missing. Cannot generate schema.",
+      routeDecision: "orchestrator",
     };
   }
   try {
@@ -66,160 +58,275 @@ export const generateSchema = async (state: GraphState) => {
       sql: string;
     }[];
     db.close();
-    // console.log(`tables: ${tables}`);
-    // console.log(typeof tables[0]);
+
     const schemaString = tables.map((t) => t.sql).join("\n");
 
     return {
       schema: schemaString,
+      feedback:"Schema generated correctly",
+      routeDecision: "orchestrator",
     };
   } catch (err) {
     if (err instanceof Error) {
-      return { error: `Failed to read database: ${err.message}` };
+      return { feedback: `Failed to read database: ${err.message}`,routeDecision:"orchestrator",retryCount:state.retryCount+1 };
     }
-    return { error: "An unknown error occurred while generating schema." };
+    return { feedback: "An unknown error occurred while generating schema." ,routeDecision:"orchestrator",retryCount:state.retryCount+1 };
   }
 };
-
-export const generateQuery = async (state: GraphState) => {
+export const generateQuery = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  
+  const prompt = await QUERY_GENERATOR_SYSTEM_PROMPT.format({
+    query:state.messages.at(-1)?.content,
+    feedback:state.feedback,
+    schema:state.schema
+  })
   const res = await queryGeneratorLlm.invoke([
-    ...QUERY_GENERATOR_SYSTEM_PROMPT,
-    new HumanMessage(`the schema of database is ${state.schema}`),
+    new SystemMessage(prompt),
     ...state.messages,
   ]);
   if (res.isIncomplete) {
     return {
-      messages: [new AIMessage(res.reasone)],
-      routeDecision: "__end__",
+      feedback: res.reason,
+      routeDecision: "queryClarifier",
     };
   }
   return {
+    feedback:"",
     sqlQuery: res.query,
-    routeDecision: "executeQuery",
+    routeDecision: "validator",
   };
 };
+export const queryClarifier = async (state:GraphState)=>{
+  const prompt = await QUERY_CLARIFIER_PROMPT.format({
+    schema:state.schema,
+    feedback:state.feedback,
+    userMessage:state.messages.at(-1)?.content
+  })
 
-export const executeQuery = async (state: GraphState) => {
-  if (!state.sqlQuery) {
-    return { error: "Sql query is missing" };
+  const res = await queryClarifierLlm.invoke([new SystemMessage(prompt),...state.messages]);
+  const interruptor = interrupt(res.message);
+  return new Command({update:{
+    messages:[new HumanMessage(interruptor)],
+    feedback:interruptor
+  },goto:"generateQuery"})
+}
+export const executeQuery = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  const sql = state.sqlQuery;
+
+  if (!sql) {
+    return {
+      feedback: "SQL query is missing.",
+      routeDecision: "orchestrator",
+      retryCount:state.retryCount+1,
+    };
   }
 
   if (!state.dbId) {
-    return { error: "Database ID is missing" };
+    return {
+      feedback: "Database ID is missing.",
+      routeDecision: "orchestrator",
+      retryCount:state.retryCount+1,
+    };
   }
 
-  const dbId = state.dbId;
-  const finalDbPath = path.join(os.tmpdir(), `queryfit_${dbId}.db`);
+  const dbPath = path.join(os.tmpdir(), `queryfit_${state.dbId}.db`);
 
-  const db = new Database(finalDbPath);
-  const sql = state.sqlQuery;
-
-  let queryResult;
-
+  let db;
   try {
-    if (sql.trim().toUpperCase().startsWith("SELECT")) {
-      queryResult = db.prepare(sql).all();
+    db = new Database(dbPath);
+  } catch (err) {
+    return {
+      feedback: `Could not open database: ${String(err)}`,
+      routeDecision: "orchestrator",
+      retryCount:state.retryCount+1,
+    };
+  }
+
+  let result;
+  try {
+    const isReadOnly = /^\s*(SELECT|WITH|PRAGMA|EXPLAIN)\b/i.test(sql);
+
+    if (isReadOnly) {
+      result = db.prepare(sql).all();
     } else {
-      queryResult = db.prepare(sql).run();
+      result = db.prepare(sql).run();
     }
-  } catch (err: any) {
+  } catch (err) {
     db.close();
-    return { error: `SQL Execution Failed: ${err.message}` };
+    return {
+      feedback: `SQL Execution failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+      retryCount:state.retryCount+1,
+      routeDecision: "orchestrator",
+    };
   }
 
   db.close();
+
   return {
-    queryResult: queryResult,
+    feedback:"Query Executed correcty and result is get stored in queryResult",
+    queryResult: result,
+    routeDecision: "orchestrator",
   };
 };
-
-export const summarizeOutput = async (state: GraphState) => {
+export const summarizeOutput = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  const prompt = await QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT.format({
+    queryRes: JSON.stringify(Array.isArray(state.queryResult)?state.queryResult.slice(0,8):state.queryResult),
+  });
   const res = await queryAnswerSummarizerLlm.invoke([
-    ...QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,
+    new SystemMessage(prompt),
     ...state.messages,
-    new AIMessage(`This is query result: ${JSON.stringify(state.queryResult)}`),
   ]);
   return {
     messages: [new AIMessage(res.output)],
+    answeredQuery: true,
+    routeDecision: "orchestrator",
   };
 };
 export const complexQueryApproval = async (state: GraphState) => {
   const approved = interrupt(
-    "Warning: This query appears to modify or delete data. Are you sure you want to proceed?"
+    "Given query may manipulate given below data. You do want to proceed?"
   );
   if (approved.shouldContinue) {
     return new Command({
       update: {
-        routeDecision: "checkSchema",
+        feedback: "User approve query",
+        routeDecision: "orchestrator",
       },
-      goto: "checkSchema",
+      goto: "orchestrator",
     });
   }
   return new Command({
     update: {
-      messages: [
-        new AIMessage(
-          "The operation was not approved and has been stopped. You can ask a new question."
-        ),
-      ],
-      routeDecision: "__end__",
+      feedback: "User dis-approve query",
+      routeDecision: "orchestrator",
     },
-    goto: "__end__",
+    goto: "orchestrator",
   });
 };
+export const queryPlanner = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  const lastMessage = state.messages.at(-1) as HumanMessage;
+  const res = await queryPlannerLlm.invoke([
+    ...QUERY_PLANNER_PROMPT,
+    new HumanMessage(lastMessage?.content),
+  ]);
+  return {
+    queryPlan: res,
+    routeDecision: "orchestrator",
+  };
+};
+export const generalChat = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  const prompt = await GENERAL_CHAT_PROMPT.format({
+    schema:state.schema,
+    feedback:state.feedback
+  })
+  const res = await generalChatLlm.invoke([new SystemMessage(prompt),...state.messages])
 
-export const generateChartData = async (state: GraphState) => {
-  try {
-    const { messages, queryResult } = state;
 
-    if (!queryResult || queryResult.length === 0) {
-      return { error: "No data available to generate a chart." };
-    }
-    const question = messages.at(-1)?.content as string;
-    if (!question) {
-      return { error: "No user question found in history." };
-    }
-    const dataSample = queryResult.slice(0, 10);
-    const formattedPrompt = await CHART_GENERATOR_PROMPT.format({
-      data: JSON.stringify(dataSample),
-      request: question,
-    });
-    const res = await chartGeneratorLlm.invoke(formattedPrompt);
-    const content = res.content as string;
-    let chartSpec: object;
-    try {
-      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```|({[\s\S]*})/);
-      if (!jsonMatch) {
-        throw new Error("No valid JSON object found in the LLM response.");
-      }
-      const jsonString = jsonMatch[1] ?? jsonMatch[0];
-      chartSpec = JSON.parse(jsonString);
-    } catch (parseError: any) {
-      console.error("Failed to parse chart spec:", content, parseError);
-      return {
-        error: `The AI returned an invalid chart format. ${parseError.message}`,
-      };
-    }
+  return {
+    routeDecision:"__end__",
+    messages:[new AIMessage(res.content)]
+  };
+};
+export const validator = async (state:GraphState): Promise<Partial<GraphState>> =>{
+    if (!state.sqlQuery) {
     return {
-      chartSpec: chartSpec,
-    };
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      return { error: `Failed to generate chart: ${err.message}` };
+      feedback: "Cannot validate. SQL query is missing.",
+      routeDecision: "orchestrator",
+      retryCount:state.retryCount+1
     }
-    return { error: "An unknown error occurred while generating the chart." };
   }
+  const prompt = await VALIDATOR_PROMPT.format({
+    sqlQuery:state.sqlQuery,
+    schema:state.schema,
+    userQuery:state.messages.at(-1)?.content
+  })
+  const res = await validatorLlm.invoke([new SystemMessage(prompt)])
+
+  return {
+    feedback:res.feedback,
+    routeDecision:res.routeDecision
+  }
+}
+export const orchestrator = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  const queryPlan = state.queryPlan;
+  const currentStepIndex = state.currentStepIndex;
+  const retryCount = state.retryCount;
+
+  const prompt = await QUERY_ORCHESTRATOR_PROMPT.format({
+    queryPlan: JSON.stringify(queryPlan),
+    currentStepIndex: currentStepIndex.toString(),
+    retryCount: retryCount.toString(),
+    feedback:state.feedback,
+    userQuery:state.messages.at(-1)?.content,
+    toolList:JSON.stringify(TOOL_REGISTRY),
+  });
+  const res = await queryOrchestratorLlm.invoke([new SystemMessage(prompt),...state.messages]);
+
+  return {
+    feedback:res.feedback,
+    needsReplanning:res.needsReplanning,
+    retryCount:res.retryCount,
+    currentStepIndex:res.currentStepIndex,
+    routeDecision: res.routeDecision,
+  };
 };
 
 
 
 
-export const queryPlanner = async (state:GraphState)=>{
-  const lastMessage = state.messages.at(-1) as HumanMessage
-  const res = await queryPlannerLlm.invoke([...QUERY_PLANNER_PROMPT,new HumanMessage(lastMessage?.content)]) 
-  return {
-    queryPlan:res,
-    routeDecision:"orchastrator"
-  }
-}
+// export const generateChartData = async (state: GraphState) => {
+//   try {
+//     const { messages, queryResult } = state;
 
+//     if (!queryResult || queryResult.length === 0) {
+//       return { error: "No data available to generate a chart." };
+//     }
+//     const question = messages.at(-1)?.content as string;
+//     if (!question) {
+//       return { error: "No user question found in history." };
+//     }
+//     const dataSample = queryResult.slice(0, 10);
+//     const formattedPrompt = await CHART_GENERATOR_PROMPT.format({
+//       data: JSON.stringify(dataSample),
+//       request: question,
+//     });
+//     const res = await chartGeneratorLlm.invoke(formattedPrompt);
+//     const content = res.content as string;
+//     let chartSpec: object;
+//     try {
+//       const jsonMatch = content.match(/```json\n([\s\S]*?)\n```|({[\s\S]*})/);
+//       if (!jsonMatch) {
+//         throw new Error("No valid JSON object found in the LLM response.");
+//       }
+//       const jsonString = jsonMatch[1] ?? jsonMatch[0];
+//       chartSpec = JSON.parse(jsonString);
+//     } catch (parseError: any) {
+//       console.error("Failed to parse chart spec:", content, parseError);
+//       return {
+//         error: `The AI returned an invalid chart format. ${parseError.message}`,
+//       };
+//     }
+//     return {
+//       chartSpec: chartSpec,
+//     };
+//   } catch (err: unknown) {
+//     if (err instanceof Error) {
+//       return { error: `Failed to generate chart: ${err.message}` };
+//     }
+//     return { error: "An unknown error occurred while generating the chart." };
+//   }
+// };
