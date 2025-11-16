@@ -35,6 +35,7 @@ export const graphState = z.object({
   chartSpec: z.any().optional(),
   answeredQuery: z.boolean().optional(),
   feedback: z.string().optional(),
+  
   queryPlan: z.custom<z.infer<typeof queryPlannerLlmSchema>>().optional(),
 });
 

@@ -84,6 +84,7 @@ export const validatorLlm = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
   temperature: 0,
+   streaming: false,
 }).withStructuredOutput(validatorLlmSchema);
 
 export const queryClarifierSchema = z.object({
@@ -93,6 +94,7 @@ export const queryClarifierLlm = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
   temperature: 0,
+   streaming: false,
 }).withStructuredOutput(queryClarifierSchema);
 
 export const queryOrchestratorLlmSchema = z.object({
@@ -131,10 +133,11 @@ export const queryOrchestratorLlmSchema = z.object({
     .describe(
       "give feedback to the next nodes if needed to make better result otherwise make it empty"
     )
-    .optional(),
+    ,
 });
 export const queryOrchestratorLlm = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
   temperature: 0.1,
+   streaming: false,
 }).withStructuredOutput(queryOrchestratorLlmSchema);
