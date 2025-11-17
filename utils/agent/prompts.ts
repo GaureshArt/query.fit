@@ -155,6 +155,12 @@ Your job is to decide the next node to execute based on:
 - Whether replanning is requested: {needsReplanning}
 - Available tool/node descriptions: {toolList}
 
+
+IMPORTANT:
+You MUST NOT call any tools or functions.
+Do NOT use the 'function_call' or 'tool_call' format.
+Only return plain JSON that follows the schema.
+ 
 =========================
 YOUR CORE OBJECTIVES
 =========================
@@ -191,6 +197,7 @@ After summarizeOutput:
 Use {toolList} as reference.
 General logic:
 - If plan requires schema but schema is missing → "generateSchema"
+- If schema is generated then dont goto generateSchema
 - If SQL is missing or unclear → "generateQuery"
 - If SQL is manipulation (UPDATE/DELETE/INSERT) before execution → "complexQueryApproval"
 - After generateQuery → "validator"
@@ -201,7 +208,7 @@ General logic:
 6. SAFETY REQUIREMENTS
 - Never execute a write query without complexQueryApproval.
 - Never generate or validate SQL without schema.
-- Never skip plan steps.
+
 - Never produce SQL yourself — that is generateQuery's job.
 - Do not summarize — that is summarizeOutput’s job.
 - Only allow needsReplanning to be set to true ONE time.  
@@ -220,6 +227,7 @@ Analyze:
 - the progress through plan steps,
 
 Then choose the **single best next node** to route to.
+and if going for the next step then make that step number as you currentStepIndex. 
 `);
 
 
@@ -328,6 +336,7 @@ If not, explain briefly.
 ### E. No Fixing or Rewriting
 You MUST NOT:
 - Rewrite SQL
+- Suggest generating schema check or route to generateSchema
 - Suggest alternative SQL
 - Suggest improvements
 - Add LIMIT or restructure anything

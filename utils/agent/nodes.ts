@@ -278,7 +278,7 @@ export const orchestrator = async (
     currentStepIndex: currentStepIndex.toString(),
     retryCount: retryCount.toString(),
     feedback:state.feedback,
-    userQuery:state.messages.at(-1)?.content,
+    userQuery:state.messages.at(-1)?.content ?? "",
     toolList:JSON.stringify(TOOL_REGISTRY),
     needsReplanning:state.needsReplanning
   });

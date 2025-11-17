@@ -1,5 +1,6 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import * as z from "zod";
+import {ChatGroq} from "@langchain/groq"
 const queryGeneratorLlmSchema = z.object({
   query: z
     .string()
@@ -20,22 +21,21 @@ const summarizerLlmSchema = z.object({
     .describe("This is summarize output of the given query output"),
 });
 
-export const queryGeneratorLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  outputVersion: "v1",
-  apiKey: process.env.GOOGLE_API_KEY,
+export const queryGeneratorLlm = new ChatGroq({
+  model: "llama-3.1-8b-instant",
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0.3,
-}).withStructuredOutput(queryGeneratorLlmSchema);
+}).withStructuredOutput(queryGeneratorLlmSchema,{strict:true});
 
-export const queryAnswerSummarizerLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  apiKey: process.env.GOOGLE_API_KEY,
+export const queryAnswerSummarizerLlm = new ChatGroq({
+  model: "llama-3.1-8b-instant",
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0.3,
-}).withStructuredOutput(summarizerLlmSchema);
+}).withStructuredOutput(summarizerLlmSchema,{strict:true});
 
-export const chartGeneratorLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  apiKey: process.env.GOOGLE_API_KEY,
+export const chartGeneratorLlm = new ChatGroq({
+  model: "llama-3.1-8b-instant",
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0,
 });
 
@@ -61,16 +61,16 @@ export const queryPlannerLlmSchema = z.object({
   ),
 });
 
-export const queryPlannerLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  apiKey: process.env.GOOGLE_API_KEY,
+export const queryPlannerLlm = new ChatGroq({
+  model: "llama-3.1-8b-instant",
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0,
   streaming: false,
 }).withStructuredOutput(queryPlannerLlmSchema);
 
-export const generalChatLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  apiKey: process.env.GOOGLE_API_KEY,
+export const generalChatLlm = new ChatGroq({
+  model: "llama-3.1-8b-instant",
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0,
 });
 
@@ -80,22 +80,22 @@ export const validatorLlmSchema = z.object({
     .enum(["orchestrator", "generateQuery"])
     .default("orchestrator"),
 });
-export const validatorLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  apiKey: process.env.GOOGLE_API_KEY,
+export const validatorLlm = new ChatGroq({
+  model: "llama-3.1-8b-instant",
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0,
    streaming: false,
-}).withStructuredOutput(validatorLlmSchema);
+}).withStructuredOutput(validatorLlmSchema,{strict:true});
 
 export const queryClarifierSchema = z.object({
   message: z.string().describe("message give to the user for clarification"),
 });
-export const queryClarifierLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  apiKey: process.env.GOOGLE_API_KEY,
+export const queryClarifierLlm = new ChatGroq({
+  model: "llama-3.1-8b-instant",
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0,
    streaming: false,
-}).withStructuredOutput(queryClarifierSchema);
+}).withStructuredOutput(queryClarifierSchema,{strict:true});
 
 export const queryOrchestratorLlmSchema = z.object({
   currentStepIndex: z
@@ -135,9 +135,9 @@ export const queryOrchestratorLlmSchema = z.object({
     )
     ,
 });
-export const queryOrchestratorLlm = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  apiKey: process.env.GOOGLE_API_KEY,
-  temperature: 0.1,
+export const queryOrchestratorLlm = new ChatGroq({
+  model: "qwen/qwen3-32b",
+  apiKey: process.env.GROQ_API_KEY,
+  temperature: 0,
    streaming: false,
 }).withStructuredOutput(queryOrchestratorLlmSchema);
