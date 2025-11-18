@@ -220,7 +220,7 @@ export const queryPlanner = async (
   const prompt = await QUERY_PLANNER_PROMPT.format({
     userMessage:lastMessage.content,
     schema:state.schema,
-    toolList:TOOL_REGISTRY
+    toolList:JSON.stringify(TOOL_REGISTRY)
   })
   const res = await queryPlannerLlm.invoke([
     new SystemMessage(prompt),

@@ -109,6 +109,9 @@ export default function QueryInterface() {
                       </Message>
                     ))}
                   {isLoading ? <Spinner /> : ""}
+                  {
+                    isLoading ? <ShimmeringText text={values.queryPlan?.steps[values.currentStepIndex]?.ui_message ?? "QueryFit is Thinking"}/>:""
+                  }
                   {interrupt && (
                     <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
                         {interrupt.value as string}
