@@ -187,9 +187,11 @@ export const summarizeOutput = async (
     ...state.messages,
   ]);
   return {
-    messages: [new AIMessage(res.output)],
-    answeredQuery: true,
+    messages: [new AIMessage(res.content)],
     routeDecision: "__end__",
+     feedback:"",
+    queryPlan:undefined,
+    currentStepIndex:0
   };
 };
 export const complexQueryApproval = async (state: GraphState) => {
@@ -243,7 +245,10 @@ export const generalChat = async (
 
   return {
     routeDecision:"__end__",
-    messages:[new AIMessage(res.content)]
+    messages:[new AIMessage(res.content)],
+    feedback:"",
+    queryPlan:undefined,
+    currentStepIndex:0
   };
 };
 export const validator = async (state:GraphState): Promise<Partial<GraphState>> =>{
@@ -269,21 +274,23 @@ export const validator = async (state:GraphState): Promise<Partial<GraphState>> 
 export const orchestrator = async (
   state: GraphState
 ): Promise<Partial<GraphState>> => {
-  const queryPlan = state.queryPlan;
-  const currentStepIndex = state.currentStepIndex;
-  const retryCount = state.retryCount;
+  try{
 
-  const prompt = await QUERY_ORCHESTRATOR_PROMPT.format({
-    queryPlan: JSON.stringify(queryPlan),
-    currentStepIndex: currentStepIndex.toString(),
-    retryCount: retryCount.toString(),
-    feedback:state.feedback,
-    userQuery:state.messages.at(-1)?.content ?? "",
-    toolList:JSON.stringify(TOOL_REGISTRY),
+    const queryPlan = state.queryPlan;
+    const currentStepIndex = state.currentStepIndex;
+    const retryCount = state.retryCount;
+    
+    const prompt = await QUERY_ORCHESTRATOR_PROMPT.format({
+      queryPlan: JSON.stringify(queryPlan),
+      currentStepIndex: currentStepIndex.toString(),
+      retryCount: retryCount.toString(),
+      feedback:state.feedback,
+      userQuery:state.messages.at(-1)?.content ?? "",
+      toolList:JSON.stringify(TOOL_REGISTRY),
     needsReplanning:state.needsReplanning
   });
   const res = await queryOrchestratorLlm.invoke([new SystemMessage(prompt),...state.messages]);
-
+  
   return {
     feedback:res.feedback,
     needsReplanning:res.needsReplanning,
@@ -291,6 +298,15 @@ export const orchestrator = async (
     currentStepIndex:res.currentStepIndex,
     routeDecision: res.routeDecision,
   };
+}catch(err){
+  return {
+    feedback:`THis is the error we got now do it again ${err}`,
+    
+    retryCount:state.retryCount+1,
+    
+    routeDecision: "orchestrator",
+  };
+}
 };
 
 

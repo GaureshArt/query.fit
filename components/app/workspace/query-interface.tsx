@@ -50,6 +50,7 @@ export default function QueryInterface() {
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
+    
   });
   const { open: isSidebarOpen } = useSidebar();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -108,9 +109,8 @@ export default function QueryInterface() {
                         </MessageContent>
                       </Message>
                     ))}
-                  {isLoading ? <Spinner /> : ""}
                   {
-                    isLoading ? <ShimmeringText text={values.queryPlan?.steps[values.currentStepIndex]?.ui_message ?? "QueryFit is Thinking"}/>:""
+                    isLoading ? <div className="flex gap-5 items-center "><Spinner /> <ShimmeringText className="inline-block" text={values.queryPlan?.steps[values.currentStepIndex]?.ui_message ?? "QueryFit is Thinking"}/></div>:""
                   }
                   {interrupt && (
                     <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
