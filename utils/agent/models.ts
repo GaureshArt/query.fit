@@ -7,7 +7,7 @@ import * as z from "zod";
 // CONFIGURATION
 // ----------------------------------------
 // Centralized model config to keep things consistent
-const GEMINI_MODEL_NAME = "gemini-2.5-flash"; // Or "gemini-3.0-pro" if available to you
+const GEMINI_MODEL_NAME = "gemini-2.5-flash";
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 const commonConfig = {
@@ -117,7 +117,7 @@ const summarizerLlmSchema = z.object({
 export const queryAnswerSummarizerLlm = new ChatGoogleGenerativeAI({
   ...commonConfig,
   temperature: 0.3,
-  streaming:true
+
 });
 
 
@@ -135,8 +135,8 @@ export const chartGeneratorLlm = new ChatGoogleGenerativeAI({
 // ----------------------------------------
 export const generalChatLlm = new ChatGoogleGenerativeAI({
   ...commonConfig,
-  temperature: 0.5, 
-  streaming:true
+  temperature: 0.3, 
+
 });
 
 

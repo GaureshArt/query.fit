@@ -29,8 +29,12 @@ import {
   QUERY_PLANNER_PROMPT,
   VALIDATOR_PROMPT,
 } from "./prompts";
-import { Command,  interrupt } from "@langchain/langgraph";
+import { Command,  interrupt, LangGraphRunnableConfig } from "@langchain/langgraph";
 import { TOOL_REGISTRY } from "./toolsInfo";
+import {
+  typedUi,
+  uiMessageReducer,
+} from "@langchain/langgraph-sdk/react-ui/server";
 
 
 
@@ -63,7 +67,7 @@ export const generateSchema = async (
 
     return {
       schema: schemaString,
-      feedback:"Schema generated correctly",
+      feedback:"Schema generated correctly. Go to next route",
       routeDecision: "orchestrator",
     };
   } catch (err) {
@@ -176,24 +180,6 @@ export const executeQuery = async (
 };
 
 
-export const summarizeOutput = async (
-  state: GraphState
-): Promise<Partial<GraphState>> => {
-  const prompt = await QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT.format({
-    queryRes: JSON.stringify(Array.isArray(state.queryResult)?state.queryResult.slice(0,8):state.queryResult),
-  });
-  const res = await queryAnswerSummarizerLlm.invoke([
-    new SystemMessage(prompt),
-    ...state.messages,
-  ]);
-  return {
-    messages: [new AIMessage(res.content)],
-    routeDecision: "__end__",
-     feedback:"",
-    queryPlan:undefined,
-    currentStepIndex:0
-  };
-};
 export const complexQueryApproval = async (state: GraphState) => {
   const approved = interrupt(
     "Given query may manipulate given below data. You do want to proceed?"
@@ -216,7 +202,7 @@ export const complexQueryApproval = async (state: GraphState) => {
   });
 };
 export const queryPlanner = async (
-  state: GraphState
+  state: GraphState,config:LangGraphRunnableConfig
 ): Promise<Partial<GraphState>> => {
   const lastMessage = state.messages.at(-1) as HumanMessage;
   const prompt = await QUERY_PLANNER_PROMPT.format({
@@ -224,6 +210,7 @@ export const queryPlanner = async (
     schema:state.schema,
     toolList:JSON.stringify(TOOL_REGISTRY)
   })
+
   const res = await queryPlannerLlm.invoke([
     new SystemMessage(prompt),
     ...state.messages
@@ -233,24 +220,7 @@ export const queryPlanner = async (
     routeDecision: "orchestrator",
   };
 };
-export const generalChat = async (
-  state: GraphState
-): Promise<Partial<GraphState>> => {
-  const prompt = await GENERAL_CHAT_PROMPT.format({
-    schema:state.schema,
-    feedback:state.feedback
-  })
-  const res = await generalChatLlm.invoke([new SystemMessage(prompt),...state.messages])
 
-
-  return {
-    routeDecision:"__end__",
-    messages:[new AIMessage(res.content)],
-    feedback:"",
-    queryPlan:undefined,
-    currentStepIndex:0
-  };
-};
 export const validator = async (state:GraphState): Promise<Partial<GraphState>> =>{
     if (!state.sqlQuery) {
     return {
@@ -289,7 +259,7 @@ export const orchestrator = async (
       toolList:JSON.stringify(TOOL_REGISTRY),
     needsReplanning:state.needsReplanning
   });
-  const res = await queryOrchestratorLlm.invoke([new SystemMessage(prompt),...state.messages]);
+  const res = await queryOrchestratorLlm.invoke([new SystemMessage(prompt),...state.messages],{recursionLimit:10});
   
   return {
     feedback:res.feedback,
@@ -309,6 +279,47 @@ export const orchestrator = async (
 }
 };
 
+
+
+
+
+export const summarizeOutput = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  const prompt = await QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT.format({
+    queryRes: JSON.stringify(Array.isArray(state.queryResult)?state.queryResult.slice(0,8):state.queryResult),
+  });
+  const res = await queryAnswerSummarizerLlm.invoke([
+    new SystemMessage(prompt),
+    ...state.messages,
+  ]);
+  return {
+    messages: [new AIMessage({ content: res.content, response_metadata: { ...res.response_metadata, tags: ["final_response"] } })],
+    routeDecision: "__end__",
+     feedback:"",
+    queryPlan:undefined,
+    currentStepIndex:0
+  };
+};
+
+export const generalChat = async (
+  state: GraphState
+): Promise<Partial<GraphState>> => {
+  const prompt = await GENERAL_CHAT_PROMPT.format({
+    schema:state.schema,
+    feedback:state.feedback
+  })
+  const res = await generalChatLlm.invoke([new SystemMessage(prompt),...state.messages])
+
+
+  return {
+    routeDecision:"__end__",
+    messages:[new AIMessage({ content: res.content,response_metadata: { ...res.response_metadata, tags: ["final_response"] }})],
+    feedback:"",
+    queryPlan:undefined,
+    currentStepIndex:0
+  };
+};
 
 
 

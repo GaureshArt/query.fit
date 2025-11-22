@@ -17,7 +17,7 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
     className={cn(
       "group flex w-full items-end gap-2 py-4",
       from === "user"
-        ? "is-user justify-end"
+        ? "is-user justify-end "
         : from === "queryresult"
         ? "is-queryresult justify-start" 
         : "is-assistant flex-row-reverse justify-end",
@@ -38,7 +38,7 @@ const messageContentVariants = cva(
           "group-[.is-queryresult]:w-[100%]",
           "group-[.is-user]:max-w-[80%]",
           "group-[.is-assistant]:max-w-[80%]",
-          "group-[.is-user]:bg-zinc-100 group-[.is-user]:text-primary-background",
+          "group-[.is-user]:bg-zinc-900 group-[.is-user]:text-primary-foreground",
           "group-[.is-assistant]:bg-white group-[.is-assistant]:text-foreground",
         ],
         flat: [

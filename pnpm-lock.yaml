@@ -110,6 +110,9 @@ importers:
       react-vega:
         specifier: ^8.0.0
         version: 8.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(vega-embed@7.1.0(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0))
+      react-vega-lite:
+        specifier: ^6.1.0
+        version: 6.1.0(react@19.1.0)(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0)
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -125,12 +128,21 @@ importers:
       use-stick-to-bottom:
         specifier: ^1.1.1
         version: 1.1.1(react@19.1.0)
+      vega:
+        specifier: ^6.2.0
+        version: 6.2.0
+      vega-embed:
+        specifier: ^7.1.0
+        version: 7.1.0(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0)
       vega-lite:
         specifier: ^6.4.1
         version: 6.4.1(vega@6.2.0)
       zod:
         specifier: ^4.1.12
         version: 4.1.12
+      zustand:
+        specifier: ^5.0.8
+        version: 5.0.8(@types/react@19.2.2)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0))
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -1815,6 +1827,9 @@ packages:
     resolution: {integrity: sha512-GZW464g1SH7ag3Y7hXjf8RoUuAFIqklOAq3MRl4OaWabTFJY9PN/E1YklhXLh+OQ3fM9yS2nOkCoS+WLZ6kvxQ==}
     engines: {node: '>=12'}
 
+  d3-selection@1.4.2:
+    resolution: {integrity: sha512-SJ0BqYihzOjDnnlfyeHT0e30k0K1+5sR3d5fNueCNeuhZTnGw4M4o8mqJchSwgKMXCNFo+e2VTChiSJ0vYtXkg==}
+
   d3-selection@3.0.0:
     resolution: {integrity: sha512-fmTRWbNMmsmWq6xJV8D19U/gw/bwrHfNXxrIN+HfZgnzqTHp9jOmKMhsTUjXOJnZOdZY9Q28y4yebKzqDKlxlQ==}
     engines: {node: '>=12'}
@@ -2608,6 +2623,9 @@ packages:
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
 
+  json-stringify-pretty-compact@2.0.0:
+    resolution: {integrity: sha512-WRitRfs6BGq4q8gTgOy4ek7iPFXjbra0H3PmDLKm2xnZ+Gh1HUhiKGgCZkSPNULlP7mvfu6FV/mOLhCarspADQ==}
+
   json-stringify-pretty-compact@4.0.0:
     resolution: {integrity: sha512-3CNZ2DnrpByG9Nqj6Xo8vqbjT4F6N+tb4Gb28ESAZjYZ5yqvmc56J+/kuIwkaAMOyblTQhUW7PxMkUb8Q36N3Q==}
 
@@ -3353,6 +3371,19 @@ packages:
       '@types/react':
         optional: true
 
+  react-vega-lite@6.1.0:
+    resolution: {integrity: sha512-9L6FszCeKqXYB2SvbkhDZKqpEi7qTHvrfc4A65gmT5Xh8pSgHGrNyuWNTZYd7pYMCvthAWkQo1COcK/rW9/d0g==}
+    deprecated: Please use react-vega>=7.0.0 instead.
+    peerDependencies:
+      react: ^16.0.0
+      vega-lite: ^3.1.0
+
+  react-vega@6.1.0:
+    resolution: {integrity: sha512-V3Rd0pIeB3zJyO+m7HwusbFpMLru09l3b4jcCSH1LOhPh2wfWQICzrpqzjdkcrjde1JZO9GDSAK+Uun+LgN8bw==}
+    peerDependencies:
+      react: ^16.0.0
+      vega: ^5.3.4
+
   react-vega@8.0.0:
     resolution: {integrity: sha512-euye4Gec2ScnUK1zbSA2tzZXUwBmbba8bfbzaRVhdEJTGQfaD78bSgqrccrl9b2fKZS1TZXR0NADEHVe6nxvBg==}
     peerDependencies:
@@ -3841,6 +3872,12 @@ packages:
   vega-dataflow@6.1.0:
     resolution: {integrity: sha512-JxumGlODtFbzoQ4c/jQK8Tb/68ih0lrexlCozcMfTAwQ12XhTqCvlafh7MAKKTMBizjOfaQTHm4Jkyb1H5CfyQ==}
 
+  vega-embed@4.2.5:
+    resolution: {integrity: sha512-3iUv5oU5y/sa7jC+shw79hPmHMpWMhMTGSovtl3+O98hLq7LQgordWKgoxKcqwhSIHMIgj+cInTNPWM4kru7Ug==}
+    peerDependencies:
+      vega: '*'
+      vega-lite: 2 || 3
+
   vega-embed@7.1.0:
     resolution: {integrity: sha512-ZmEIn5XJrQt7fSh2lwtSdXG/9uf3yIqZnvXFEwBJRppiBgrEWZcZbj6VK3xn8sNTFQ+sQDXW5sl/6kmbAW3s5A==}
     peerDependencies:
@@ -3905,6 +3942,9 @@ packages:
   vega-scenegraph@5.1.0:
     resolution: {integrity: sha512-4gA89CFIxkZX+4Nvl8SZF2MBOqnlj9J5zgdPh/HPx+JOwtzSlUqIhxFpFj7GWYfwzr/PyZnguBLPihPw1Og/cA==}
 
+  vega-schema-url-parser@1.1.0:
+    resolution: {integrity: sha512-Tc85J2ofMZZOsxiqDM9sbvfsa+Vdo3GwNLjEEsPOsCDeYqsUHKAlc1IpbbhPLZ6jusyM9Lk0e1izF64GGklFDg==}
+
   vega-schema-url-parser@3.0.2:
     resolution: {integrity: sha512-xAnR7KAvNPYewI3O0l5QGdT8Tv0+GCZQjqfP39cW/hbe/b3aYMAQ39vm8O2wfXUHzm04xTe7nolcsx8WQNVLRQ==}
 
@@ -3913,6 +3953,12 @@ packages:
 
   vega-statistics@2.0.0:
     resolution: {integrity: sha512-dGPfDXnBlgXbZF3oxtkb8JfeRXd5TYHx25Z/tIoaa9jWua4Vf/AoW2wwh8J1qmMy8J03/29aowkp1yk4DOPazQ==}
+
+  vega-themes@2.15.0:
+    resolution: {integrity: sha512-DicRAKG9z+23A+rH/3w3QjJvKnlGhSbbUXGjBvYGseZ1lvj9KQ0BXZ2NS/+MKns59LNpFNHGi9us/wMlci4TOA==}
+    peerDependencies:
+      vega: '*'
+      vega-lite: '*'
 
   vega-themes@3.0.0:
     resolution: {integrity: sha512-1iFiI3BNmW9FrsLnDLx0ZKEddsCitRY3XmUAwp6qmp+p+IXyJYc9pfjlVj9E6KXBPfm4cQyU++s0smKNiWzO4g==}
@@ -3923,6 +3969,9 @@ packages:
   vega-time@3.1.0:
     resolution: {integrity: sha512-G93mWzPwNa6UYQRkr8Ujur9uqxbBDjDT/WpXjbDY0yygdSkRT+zXF+Sb4gjhW0nPaqdiwkn0R6kZcSPMj1bMNA==}
 
+  vega-tooltip@0.18.1:
+    resolution: {integrity: sha512-g/i69QLTVhGeHNT8k646Qr8SFss9kbnt6XmU9ujjqgaW5B/p1FPUrMzFh/88rMF704EHYyBH7Aj3t0ds1cCHbQ==}
+
   vega-tooltip@1.0.0:
     resolution: {integrity: sha512-P1R0JP29v0qnTuwzCQ0SPJlkjAzr6qeyj+H4VgUFSykHmHc1OBxda//XBaFDl/bZgIscEMvjKSjZpXd84x3aZQ==}
 
@@ -3931,6 +3980,9 @@ packages:
 
   vega-typings@2.1.0:
     resolution: {integrity: sha512-zdis4Fg4gv37yEvTTSZEVMNhp8hwyEl7GZ4X4HHddRVRKxWFsbyKvZx/YW5Z9Ox4sjxVA2qHzEbod4Fdx+SEJA==}
+
+  vega-util@1.17.4:
+    resolution: {integrity: sha512-+y3ZW7dEqM8Ck+KRsd+jkMfxfE7MrQxUyIpNjkfhIpGEreym+aTn7XUw1DKXqclr8mqTQvbilPo16B3lnBr0wA==}
 
   vega-util@2.1.0:
     resolution: {integrity: sha512-PGfp0m0QCufDmcxKJCWQy4Ov23FoF8DSXmoJwSezi3itQaa2hbxK0+xwsTMP2vy4PR16Pu25HMzgMwXVW1+33w==}
@@ -4078,6 +4130,24 @@ packages:
 
   zod@4.1.12:
     resolution: {integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==}
+
+  zustand@5.0.8:
+    resolution: {integrity: sha512-gyPKpIaxY9XcO2vSMrLbiER7QMAMGOQZVRdJ6Zi782jkbzZygq5GI9nG8g+sMgitRtndwaBSl7uiqC49o1SSiw==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -5713,6 +5783,8 @@ snapshots:
       d3-time: 3.1.0
       d3-time-format: 4.1.0
 
+  d3-selection@1.4.2: {}
+
   d3-selection@3.0.0: {}
 
   d3-shape@1.3.7:
@@ -6743,6 +6815,8 @@ snapshots:
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
+  json-stringify-pretty-compact@2.0.0: {}
+
   json-stringify-pretty-compact@4.0.0: {}
 
   json5@1.0.2:
@@ -7723,6 +7797,24 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.2
 
+  react-vega-lite@6.1.0(react@19.1.0)(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0):
+    dependencies:
+      react: 19.1.0
+      react-vega: 6.1.0(react@19.1.0)(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0)
+      vega-embed: 4.2.5(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0)
+      vega-lite: 6.4.1(vega@6.2.0)
+    transitivePeerDependencies:
+      - vega
+
+  react-vega@6.1.0(react@19.1.0)(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0):
+    dependencies:
+      prop-types: 15.8.1
+      react: 19.1.0
+      vega: 6.2.0
+      vega-embed: 4.2.5(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0)
+    transitivePeerDependencies:
+      - vega-lite
+
   react-vega@8.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(vega-embed@7.1.0(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0)):
     dependencies:
       fast-deep-equal: 3.1.3
@@ -8388,6 +8480,17 @@ snapshots:
       vega-loader: 5.1.0
       vega-util: 2.1.0
 
+  vega-embed@4.2.5(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0):
+    dependencies:
+      d3-selection: 1.4.2
+      json-stringify-pretty-compact: 2.0.0
+      semver: 6.3.1
+      vega: 6.2.0
+      vega-lite: 6.4.1(vega@6.2.0)
+      vega-schema-url-parser: 1.1.0
+      vega-themes: 2.15.0(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0)
+      vega-tooltip: 0.18.1
+
   vega-embed@7.1.0(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0):
     dependencies:
       fast-json-patch: 3.1.1
@@ -8533,6 +8636,8 @@ snapshots:
       vega-scale: 8.1.0
       vega-util: 2.1.0
 
+  vega-schema-url-parser@1.1.0: {}
+
   vega-schema-url-parser@3.0.2: {}
 
   vega-selections@6.1.0:
@@ -8545,6 +8650,11 @@ snapshots:
     dependencies:
       d3-array: 3.2.4
 
+  vega-themes@2.15.0(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0):
+    dependencies:
+      vega: 6.2.0
+      vega-lite: 6.4.1(vega@6.2.0)
+
   vega-themes@3.0.0(vega-lite@6.4.1(vega@6.2.0))(vega@6.2.0):
     dependencies:
       vega: 6.2.0
@@ -8555,6 +8665,10 @@ snapshots:
       d3-array: 3.2.4
       d3-time: 3.1.0
       vega-util: 2.1.0
+
+  vega-tooltip@0.18.1:
+    dependencies:
+      vega-util: 1.17.4
 
   vega-tooltip@1.0.0:
     dependencies:
@@ -8574,6 +8688,8 @@ snapshots:
       vega-event-selector: 4.0.0
       vega-expression: 6.1.0
       vega-util: 2.1.0
+
+  vega-util@1.17.4: {}
 
   vega-util@2.1.0: {}
 
@@ -8776,5 +8892,11 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.1.12: {}
+
+  zustand@5.0.8(@types/react@19.2.2)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)):
+    optionalDependencies:
+      '@types/react': 19.2.2
+      react: 19.1.0
+      use-sync-external-store: 1.6.0(react@19.1.0)
 
   zwitch@2.0.4: {}

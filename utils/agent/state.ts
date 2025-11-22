@@ -1,14 +1,15 @@
 import * as z from "zod";
 import { BaseMessage } from "@langchain/core/messages";
 import { registry } from "@langchain/langgraph/zod";
+import {addMessages} from "@langchain/langgraph"
 import { queryPlannerLlmSchema } from "./models";
 export const graphState = z.object({
   messages: z.array(z.custom<BaseMessage>()).register(registry, {
     reducer: {
-      fn: (a: BaseMessage[], b: BaseMessage[]) => a.concat(b),
+      fn: addMessages,
     },
     default: () => [] as BaseMessage[],
-  }),
+  }),   
   dbId: z.string(),
   schema: z.string().optional(),
   sqlQuery: z.string().optional(),
@@ -35,7 +36,10 @@ export const graphState = z.object({
   chartSpec: z.any().optional(),
   answeredQuery: z.boolean().optional(),
   feedback: z.string().optional(),
-  
+ ui: z
+    .array(z.unknown()) 
+    .optional()
+    .default([]),
   queryPlan: z.custom<z.infer<typeof queryPlannerLlmSchema>>().optional(),
 });
 

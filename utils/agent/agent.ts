@@ -62,6 +62,6 @@ const QueryFitAgent = new StateGraph(graphState)
     orchestrator:"orchestrator",
     generateQuery:"generateQuery"
   })
-  .compile({ checkpointer });
+  .compile({ checkpointer ,name:"QueryFit"});
 
 export default QueryFitAgent;

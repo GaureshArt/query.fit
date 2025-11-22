@@ -41,9 +41,9 @@ export default async function HeroSection() {
           {user.data.user?.id ? (
             <div className={cn("col-span-2 flex justify-center col-start-4")}>
               <WelcomeButton
-                text={`Welcome ${
+                text={
                   user.data.user.user_metadata.name.split(" ")[0]
-                }`}
+                }
                 iconSvg={null}
                 className={cn(
                   " row-span-1 row-start-7  font-cutive-mono cursor-pointer"

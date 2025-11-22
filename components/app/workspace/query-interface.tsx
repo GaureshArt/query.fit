@@ -1,4 +1,13 @@
 "use client";
+
+import {
+  typedUi,
+  uiMessageReducer,
+} from "@langchain/langgraph-sdk/react-ui/server";
+import {
+  LoadExternalComponent,
+  useStreamContext,
+} from "@langchain/langgraph-sdk/react-ui";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +20,7 @@ import * as z from "zod";
 
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { GraphState } from "@/utils/agent/state";
-import { BaseMessage } from "@langchain/core/messages";
+import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -38,20 +47,25 @@ import {
   SlideToUnlockTrack,
 } from "@/components/external-ui/slide-to-unlock";
 import { ShimmeringText } from "@/components/external-ui/shimmering-text";
+import EmptyStateChatInterface from "./empty-state-chat-interface";
+import { useUserInfo } from "@/lib/user-store";
+
 
 const formSchema = z.object({
   query: z.string().min(3, "Please enter proper query. At least 3 characters"),
 });
 
 export default function QueryInterface() {
+
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session-id");
-  const { submit, values, isLoading, interrupt } = useStream<GraphState>({
+  const {name:userName} = useUserInfo()
+  const thread = useStream<GraphState>({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
-    
   });
+
   const { open: isSidebarOpen } = useSidebar();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,8 +79,8 @@ export default function QueryInterface() {
   }
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    submit({
-      messages: [{ type: "human", content: data.query }] as BaseMessage[],
+    thread.submit({
+      messages: [new HumanMessage(data.query)] ,
       dbId: sessionId,
     });
     form.reset();
@@ -89,38 +103,51 @@ export default function QueryInterface() {
         >
           <Conversation>
             <ConversationContent className="w-auto max-w-full">
-              {values.messages && values.messages.length === 0 ? (
+              {thread.messages && thread.messages.length === 0 ? (
                 <ConversationEmptyState
-                  description="Messages will appear here as the conversation progresses."
-                  icon={<MessageSquareIcon className="size-6" />}
-                  title="Start a conversation"
+                  children={<EmptyStateChatInterface username={userName}/>}
                 />
               ) : (
                 <>
-                  {values.messages &&
-                    values.messages.map((message, index) => (
+                  {thread.messages &&
+                    thread.messages.map((message, index) =>{
+
+                        const metaData = message.response_metadata as {
+                        tags:string[]
+                      }
+                    return ((( metaData.tags?.length && metaData.tags.includes("final_response"))  || (message.type==="human")) ? 
                       <Message
                         className=" mb-2"
                         from={message.type === "human" ? "user" : "assistant"}
                         key={index}
                       >
-                        <MessageContent className={cn("", "font-semibold")}>
-                          <Response>{message.content as string}</Response>
+                        <MessageContent className={cn("")}>
+                          {message.type === "ai" || message.type === "human" ? (
+                            <Response className={cn(message.type === "human" ? "bg-black":"")}>
+                              {typeof message.content === "string"
+                                ? message.content
+                                : message.content.map((part) =>
+                                    part.type === "text" ? part.text : ""
+                                  )}
+                            </Response>
+                          ) : (
+                            ""
+                          )}
                         </MessageContent>
-                      </Message>
-                    ))}
-                  {
-                    isLoading ? <div className="flex gap-5 items-center "><Spinner /> <ShimmeringText className="inline-block" text={values.queryPlan?.steps[values.currentStepIndex]?.ui_message ?? "QueryFit is Thinking"}/></div>:""
-                  }
-                  {interrupt && (
-                    <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
-                        {interrupt.value as string}
-                      <div className="flex gap-4">
+                      </Message>:""
+                    )})}
 
+                  {
+                    thread.isLoading ? <div className="flex gap-5 items-center "><Spinner /> <ShimmeringText className="inline-block" text={thread.values.queryPlan?.steps[thread.values.currentStepIndex]?.ui_message ?? "QueryFit is Thinking"}/></div>:""
+                  }
+                  {thread.interrupt && (
+                    <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
+                      {thread.interrupt.value as string}
+                      <div className="flex gap-4">
                         <SlideToUnlock
-                        className=" w-70 h-10 rounded-md"
+                          className=" w-70 h-10 rounded-md"
                           onUnlock={() => {
-                            submit(undefined, {
+                            thread.submit(undefined, {
                               command: { resume: { shouldContinue: true } },
                             });
                           }}
@@ -134,14 +161,14 @@ export default function QueryInterface() {
                                 />
                               )}
                             </SlideToUnlockText>
-                            <SlideToUnlockHandle className="h-8"/>
+                            <SlideToUnlockHandle className="h-8" />
                           </SlideToUnlockTrack>
                         </SlideToUnlock>
                         <Button
-                        className={cn("font-semibold cursor-pointer")}
+                          className={cn("font-semibold cursor-pointer")}
                           variant={"secondary"}
                           onClick={() => {
-                            submit(undefined, {
+                            thread.submit(undefined, {
                               command: { resume: { shouldContinue: false } },
                             });
                           }}
@@ -151,35 +178,46 @@ export default function QueryInterface() {
                       </div>
                     </div>
                   )}
-                  {values.queryResult && (
+
+                  {thread.values.ui?.length ? (
+                    <LoadExternalComponent
+                      key={"weather"}
+                      namespace="agent"
+                      stream={thread}
+                      fallback={<span>Nothing</span>}
+                    />
+                  ) : (
+                    "NoUi"
+                  )}
+
+                  {thread.values.queryResult && (
                     <Message from="queryresult" className=" ">
                       <MessageContent className=" w-full">
                         <p className="font-semibold ">Query Result:</p>
 
                         <div className="w-full  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                          <DynamicTable data={values.queryResult} />
+                          <DynamicTable data={thread.values.queryResult} />
                         </div>
                       </MessageContent>
                     </Message>
                   )}
 
-
-                  {
-                    values.queryPlan &&(
-                      <Message from="assistant" className=" overflow-auto">
+                  {thread.values.queryPlan && (
+                    <Message from="assistant" className=" overflow-auto">
                       <MessageContent className=" w-full">
                         <p className="font-semibold ">Query Result:</p>
 
                         {/* <div className="w-full  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"> */}
-                          {/* <code> */}
-                          <Response>{JSON.stringify(values.queryPlan)}</Response>
-                            
-                          {/* </code> */}
+                        {/* <code> */}
+                        <Response>
+                          {JSON.stringify(thread.values.queryPlan)}
+                        </Response>
+
+                        {/* </code> */}
                         {/* </div> */}
                       </MessageContent>
                     </Message>
-                    )
-                  }
+                  )}
                 </>
               )}
             </ConversationContent>
