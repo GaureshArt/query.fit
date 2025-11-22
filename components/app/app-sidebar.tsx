@@ -22,6 +22,7 @@ import { getUserData } from "@/utils/supabase/actions";
 import { SubscriptionData } from "@/types/subscription.types";
 import { SIDEBAR_NAV_MAIN_DATA } from "@/constants/sidebar-data";
 import { useRouter } from "next/navigation";
+import { useUserInfo } from "@/lib/user-store";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
@@ -32,7 +33,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   } = useQuery({
     queryKey: ["user", "user-info"],
     queryFn: getUserData,
+ 
   });
+
+  const {setName} = useUserInfo();
+React.useEffect(() => {
+  if (user) {
+    setName(user.user_metadata.name)
+  }
+}, [user]);
   const { data: planData } = useQuery<SubscriptionData, Error>({
     queryKey: ["user", "subscription-plan"],
     queryFn: async () => {

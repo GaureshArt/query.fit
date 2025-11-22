@@ -205,11 +205,7 @@ export const queryPlanner = async (
   state: GraphState,config:LangGraphRunnableConfig
 ): Promise<Partial<GraphState>> => {
   const lastMessage = state.messages.at(-1) as HumanMessage;
-  const prompt = await QUERY_PLANNER_PROMPT.format({
-    userMessage:lastMessage.content,
-    schema:state.schema,
-    toolList:JSON.stringify(TOOL_REGISTRY)
-  })
+  const prompt = await QUERY_PLANNER_PROMPT.format({})
 
   const res = await queryPlannerLlm.invoke([
     new SystemMessage(prompt),
@@ -288,6 +284,7 @@ export const summarizeOutput = async (
 ): Promise<Partial<GraphState>> => {
   const prompt = await QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT.format({
     queryRes: JSON.stringify(Array.isArray(state.queryResult)?state.queryResult.slice(0,8):state.queryResult),
+    schema:state.schema
   });
   const res = await queryAnswerSummarizerLlm.invoke([
     new SystemMessage(prompt),

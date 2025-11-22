@@ -3,6 +3,7 @@ import { BaseMessage } from "@langchain/core/messages";
 import { registry } from "@langchain/langgraph/zod";
 import {addMessages} from "@langchain/langgraph"
 import { queryPlannerLlmSchema } from "./models";
+
 export const graphState = z.object({
   messages: z.array(z.custom<BaseMessage>()).register(registry, {
     reducer: {
@@ -36,6 +37,7 @@ export const graphState = z.object({
   chartSpec: z.any().optional(),
   answeredQuery: z.boolean().optional(),
   feedback: z.string().optional(),
+  validatorScore:z.number().optional(),
  ui: z
     .array(z.unknown()) 
     .optional()

@@ -19,32 +19,43 @@ const commonConfig = {
 // Query Planner
 // ----------------------------------------
 export const queryPlannerLlmSchema = z.object({
+  // Added reasoning to force internal monologue before classification
+  reasoning: z.string().describe("Explain why you chose this specific plan and intent based on user context and tool availability."),
+  
   intent: z.enum([
     "general",
     "retrieval",
-    "manipulation",
+    "manipulation", 
     "visual-analytical",
-    "multi-step",
-  ]).describe("Classify the user's intent into one of these categories."),
+    "multi-step", 
+  ]).describe("Classify the user's intent. Use 'multi-step' if the request involves both chatting and database actions."),
+  
   steps: z.array(
     z.object({
-      step_number: z.number().describe("Number of the step to execute."),
-      tool_name: z.string().describe("Name of the tool needed to use."),
+      step_number: z.number().describe("The execution order number."),
+      tool_name: z.enum([
+        "generateSchema", 
+        "generateQuery", 
+        "queryPlanner", 
+        "executeQuery", 
+        "summarizeOutput", 
+        "generalChat", 
+        "complexQueryApproval"
+      ]).describe("The specific tool from the registry to use."),
       description: z
         .string()
-        .describe("Explain to the user why this tool is needed in simple language."),
+        .describe("Internal technical note on why this tool is used."),
       ui_message: z
         .string()
-        .describe("Message to show the user while performing this action."),
+        .describe("A user-friendly status message to display on the frontend (e.g., 'Scanning database structure...', 'Asking for permission...')."),
     })
   ),
 });
 
 export const queryPlannerLlm = new ChatGoogleGenerativeAI({
   ...commonConfig,
-  temperature: 0,
+  temperature: 0, 
 }).withStructuredOutput(queryPlannerLlmSchema, { name: "planner_output" });
-
 
 // ----------------------------------------
 // Orchestrator
