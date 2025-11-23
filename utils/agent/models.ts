@@ -105,7 +105,7 @@ export const queryOrchestratorLlm = new ChatGoogleGenerativeAI({
 
 
 export const queryOrchestratorLlmMistral = new ChatMistralAI({
-  model:"mistral-medium-2508",
+  model:"mistral-large-2407",
   apiKey:process.env.MISTRAL_API_KEY,
   temperature:0,
 

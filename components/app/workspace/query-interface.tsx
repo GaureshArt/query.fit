@@ -49,18 +49,17 @@ import {
 import { ShimmeringText } from "@/components/external-ui/shimmering-text";
 import EmptyStateChatInterface from "./empty-state-chat-interface";
 import { useUserInfo } from "@/lib/user-store";
-
+import ConversationInterface from "./conversation-interface";
 
 const formSchema = z.object({
   query: z.string().min(3, "Please enter proper query. At least 3 characters"),
 });
 
 export default function QueryInterface() {
-
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session-id");
-  const {name:userName} = useUserInfo()
-  const thread = useStream<GraphState>({
+  const { name: userName } = useUserInfo();
+  const thread = useStream<GraphState, { InterruptType: string }>({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
@@ -80,7 +79,7 @@ export default function QueryInterface() {
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     thread.submit({
-      messages: [new HumanMessage(data.query)] ,
+      messages: [new HumanMessage(data.query)],
       dbId: sessionId,
     });
     form.reset();
@@ -101,128 +100,21 @@ export default function QueryInterface() {
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           )}
         >
-          <Conversation>
-            <ConversationContent className="w-auto max-w-full">
-              {thread.messages && thread.messages.length === 0 ? (
-                <ConversationEmptyState
-                  children={<EmptyStateChatInterface username={userName}/>}
-                />
-              ) : (
-                <>
-                  {thread.messages &&
-                    thread.messages.map((message, index) =>{
-
-                        const metaData = message.response_metadata as {
-                        tags:string[]
-                      }
-                    return ((( metaData.tags?.length && metaData.tags.includes("final_response"))  || (message.type==="human")) ? 
-                      <Message
-                        className=" mb-2"
-                        from={message.type === "human" ? "user" : "assistant"}
-                        key={index}
-                      >
-                        <MessageContent className={cn("")}>
-                          {message.type === "ai" || message.type === "human" ? (
-                            <Response className={cn(message.type === "human" ? "bg-black":"")}>
-                              {typeof message.content === "string"
-                                ? message.content
-                                : message.content.map((part) =>
-                                    part.type === "text" ? part.text : ""
-                                  )}
-                            </Response>
-                          ) : (
-                            ""
-                          )}
-                        </MessageContent>
-                      </Message>:""
-                    )})}
-
-                  {
-                    thread.isLoading ? <div className="flex gap-5 items-center "><Spinner /> <ShimmeringText className="inline-block" text={thread.values.queryPlan?.steps[thread.values.currentStepIndex]?.ui_message ?? "QueryFit is Thinking"}/></div>:""
-                  }
-                  {thread.interrupt && (
-                    <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
-                      {thread.interrupt.value as string}
-                      <div className="flex gap-4">
-                        <SlideToUnlock
-                          className=" w-70 h-10 rounded-md"
-                          onUnlock={() => {
-                            thread.submit(undefined, {
-                              command: { resume: { shouldContinue: true } },
-                            });
-                          }}
-                        >
-                          <SlideToUnlockTrack className="">
-                            <SlideToUnlockText className=" ">
-                              {({ isDragging }) => (
-                                <ShimmeringText
-                                  text="slide to confirm"
-                                  isStopped={isDragging}
-                                />
-                              )}
-                            </SlideToUnlockText>
-                            <SlideToUnlockHandle className="h-8" />
-                          </SlideToUnlockTrack>
-                        </SlideToUnlock>
-                        <Button
-                          className={cn("font-semibold cursor-pointer")}
-                          variant={"secondary"}
-                          onClick={() => {
-                            thread.submit(undefined, {
-                              command: { resume: { shouldContinue: false } },
-                            });
-                          }}
-                        >
-                          Stop
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {thread.values.ui?.length ? (
-                    <LoadExternalComponent
-                      key={"weather"}
-                      namespace="agent"
-                      stream={thread}
-                      fallback={<span>Nothing</span>}
-                    />
-                  ) : (
-                    "NoUi"
-                  )}
-
-                  {thread.values.queryResult && (
-                    <Message from="queryresult" className=" ">
-                      <MessageContent className=" w-full">
-                        <p className="font-semibold ">Query Result:</p>
-
-                        <div className="w-full  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                          <DynamicTable data={thread.values.queryResult} />
-                        </div>
-                      </MessageContent>
-                    </Message>
-                  )}
-
-                  {thread.values.queryPlan && (
-                    <Message from="assistant" className=" overflow-auto">
-                      <MessageContent className=" w-full">
-                        <p className="font-semibold ">Query Result:</p>
-
-                        {/* <div className="w-full  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"> */}
-                        {/* <code> */}
-                        <Response>
-                          {JSON.stringify(thread.values.queryPlan)}
-                        </Response>
-
-                        {/* </code> */}
-                        {/* </div> */}
-                      </MessageContent>
-                    </Message>
-                  )}
-                </>
-              )}
-            </ConversationContent>
-            <ConversationScrollButton />
-          </Conversation>
+          <ConversationInterface
+            state={thread.values}
+            isLoading={thread.isLoading}
+            interrupt={thread.interrupt}
+            submit={() => {
+              thread.submit(undefined, {
+                command: { resume: { shouldContinue: true } },
+              });
+            }}
+            disapproveSubmit={() => {
+              thread.submit(undefined, {
+                command: { resume: { shouldContinue: false } },
+              });
+            }}
+          />
         </div>
 
         <div

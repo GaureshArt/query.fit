@@ -156,7 +156,7 @@ export const QUERY_ORCHESTRATOR_PROMPT = PromptTemplate.fromTemplate(`
     <output_format>
         Output JSON ONLY:
         {{
-            "routeDecision": "ToolName | __end__",
+            "routeDecision": "ToolName",
             "currentStepIndex": Number,
             "retryCount": Number,
             "needsReplanning": Boolean,
