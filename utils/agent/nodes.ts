@@ -7,6 +7,7 @@ import {
   queryClarifierLlm,
   queryGeneratorLlm,
   queryOrchestratorLlm,
+  queryOrchestratorLlmMistral,
   queryPlannerLlm,
   queryPlannerLlmSchema,
   validatorLlm,
@@ -253,9 +254,10 @@ export const orchestrator = async (
       feedback:state.feedback,
       userQuery:state.messages.at(-1)?.content ?? "",
       toolList:JSON.stringify(TOOL_REGISTRY),
-    needsReplanning:state.needsReplanning
+    needsReplanning:state.needsReplanning,
+    validatorScore: state.validatorScore?.toString() ?? "0",
   });
-  const res = await queryOrchestratorLlm.invoke([new SystemMessage(prompt),...state.messages],{recursionLimit:10});
+  const res = await queryOrchestratorLlmMistral.invoke([new SystemMessage(prompt),...state.messages],{recursionLimit:10});
   
   return {
     feedback:res.feedback,
@@ -278,24 +280,42 @@ export const orchestrator = async (
 
 
 
-
 export const summarizeOutput = async (
   state: GraphState
 ): Promise<Partial<GraphState>> => {
+  const rawResult = state.queryResult;
+  
+  // Logic to check if we are cutting off data
+  const LIMIT = 8;
+  const isTruncated = Array.isArray(rawResult) && rawResult.length > LIMIT;
+  
+  // Slice the data for the LLM context window
+  const displayData = Array.isArray(rawResult) 
+    ? rawResult.slice(0, LIMIT) 
+    : rawResult;
+
   const prompt = await QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT.format({
-    queryRes: JSON.stringify(Array.isArray(state.queryResult)?state.queryResult.slice(0,8):state.queryResult),
-    schema:state.schema
+    queryRes: JSON.stringify(displayData),
+    schema: state.schema ?? "No schema provided",
+    is_truncated: isTruncated ? "true" : "false" // Pass this flag to the prompt
   });
+
   const res = await queryAnswerSummarizerLlm.invoke([
     new SystemMessage(prompt),
     ...state.messages,
   ]);
+
   return {
-    messages: [new AIMessage({ content: res.content, response_metadata: { ...res.response_metadata, tags: ["final_response"] } })],
+    messages: [
+      new AIMessage({
+        content: res.content,
+        response_metadata: { ...res.response_metadata, tags: ["final_response"] },
+      }),
+    ],
     routeDecision: "__end__",
-     feedback:"",
-    queryPlan:undefined,
-    currentStepIndex:0
+    feedback: "",
+    queryPlan: undefined,
+    currentStepIndex: 0,
   };
 };
 

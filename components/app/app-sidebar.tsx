@@ -36,10 +36,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
  
   });
 
-  const {setName} = useUserInfo();
+  const {setName,name} = useUserInfo();
 React.useEffect(() => {
-  if (user) {
-    setName(user.user_metadata.name)
+  if (user && !name) {
+    setName(user?.user_metadata.name as string)
   }
 }, [user]);
   const { data: planData } = useQuery<SubscriptionData, Error>({
