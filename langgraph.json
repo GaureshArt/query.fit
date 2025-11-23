@@ -1,0 +1,16 @@
+{
+  "node_version": "20",
+  "dockerfile_lines": [],
+  "dependencies": ["."],
+  "graphs": {
+    "agent":{
+      "path": "./utils/agent/agent.ts:default",
+      "stream_mode": ["messages"]
+      
+    }
+  },
+   "ui": {
+    "agent": "./utils/agent/ui.tsx"
+  },
+  "env":"./.env"
+}
