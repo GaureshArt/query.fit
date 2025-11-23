@@ -1,59 +1,14 @@
 "use client";
-
-import {
-  typedUi,
-  uiMessageReducer,
-} from "@langchain/langgraph-sdk/react-ui/server";
-import {
-  LoadExternalComponent,
-  useStreamContext,
-} from "@langchain/langgraph-sdk/react-ui";
-import { Button } from "@/components/ui/button";
-import { Field, FieldError } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import PromptSendSvg from "@/public/app-svgs/prompt-send-svg";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { Toaster } from "sonner";
 import * as z from "zod";
-
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { GraphState } from "@/utils/agent/state";
-import { BaseMessage, HumanMessage } from "@langchain/core/messages";
+import { HumanMessage } from "@langchain/core/messages";
 import { useSearchParams } from "next/navigation";
-
-import {
-  Conversation,
-  ConversationContent,
-  ConversationEmptyState,
-  ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
-import { MessageSquareIcon } from "lucide-react";
-import {
-  Message,
-  MessageAvatar,
-  MessageContent,
-} from "@/components/ai-elements/message";
-import { Spinner } from "@/components/ui/spinner";
-import { DynamicTable } from "./dynamic-table";
 import { useSidebar } from "@/components/ui/sidebar";
-import { Response } from "@/components/ai-elements/response";
-
-import {
-  SlideToUnlock,
-  SlideToUnlockHandle,
-  SlideToUnlockText,
-  SlideToUnlockTrack,
-} from "@/components/external-ui/slide-to-unlock";
-import { ShimmeringText } from "@/components/external-ui/shimmering-text";
-import EmptyStateChatInterface from "./empty-state-chat-interface";
 import { useUserInfo } from "@/lib/user-store";
 import ConversationInterface from "./conversation-interface";
-
-const formSchema = z.object({
-  query: z.string().min(3, "Please enter proper query. At least 3 characters"),
-});
+import PromptInput, { formSchema } from "./prompt-input";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
@@ -66,12 +21,6 @@ export default function QueryInterface() {
   });
 
   const { open: isSidebarOpen } = useSidebar();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      query: "",
-    },
-  });
 
   if (!sessionId) {
     return <div>Session id is missing . First upload file and try again</div>;
@@ -82,7 +31,6 @@ export default function QueryInterface() {
       messages: [new HumanMessage(data.query)],
       dbId: sessionId,
     });
-    form.reset();
   };
   return (
     <>
@@ -104,6 +52,7 @@ export default function QueryInterface() {
             state={thread.values}
             isLoading={thread.isLoading}
             interrupt={thread.interrupt}
+            name={userName}
             submit={() => {
               thread.submit(undefined, {
                 command: { resume: { shouldContinue: true } },
@@ -123,55 +72,7 @@ export default function QueryInterface() {
             isSidebarOpen ? "w-4/5" : "w-full"
           )}
         >
-          <div
-            className={cn(
-              "w-full md:w-4/6   rounded-xl md:px-6 py-4",
-              isSidebarOpen ? "md:w-4/6" : ""
-            )}
-          >
-            <Toaster position="top-center" richColors />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="relative w-full  border-none"
-            >
-              <Controller
-                name="query"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field>
-                    {fieldState.error && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                    <Textarea
-                      {...field}
-                      autoFocus
-                      placeholder="Ask your database!"
-                      className={cn(
-                        "md:text-lg font-medium",
-                        "shadow-[2px_2px_6px_3px_#f3f3f3ea]",
-                        "h-24 resize-none overflow-y-auto bg-white border border-zinc-500  rounded-xl pr-12 px-4 py-2",
-                        "focus-visible:ring-0 focus-visible:outline-none",
-                        "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                      )}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          form.handleSubmit(onSubmit)();
-                        }
-                      }}
-                    />
-                  </Field>
-                )}
-              />
-
-              <Button
-                type="submit"
-                className="absolute bottom-3 right-3 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"
-              >
-                <PromptSendSvg />
-              </Button>
-            </form>
-          </div>
+          <PromptInput isSidebarOpen={isSidebarOpen} submit={onSubmit} />
         </div>
       </div>
     </>

@@ -1,7 +1,6 @@
 import { Conversation, ConversationContent, ConversationEmptyState, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { cn } from "@/lib/utils";
 import { GraphState } from "@/utils/agent/state";
-import { BaseMessage } from "@langchain/core/messages";
 import { Interrupt } from "@langchain/langgraph";
 import EmptyStateChatInterface from "./empty-state-chat-interface";
 import { Message, MessageContent } from "@/components/ai-elements/message";
@@ -18,15 +17,16 @@ interface IConversationInterfaceProps{
     interrupt:Interrupt<string> | undefined,
     submit:()=>void;
     disapproveSubmit:()=>void;
+    name:string
 }
-export default function ConversationInterface({state,isLoading,interrupt,submit,disapproveSubmit}:IConversationInterfaceProps) {
+export default function ConversationInterface({state,isLoading,interrupt,name,submit,disapproveSubmit}:IConversationInterfaceProps) {
     return (
         <>  
             <Conversation>
             <ConversationContent className="w-auto max-w-full">
               {!state.messages ? (
                 <ConversationEmptyState
-                  children={<EmptyStateChatInterface username={'Gauresh'}/>}
+                  children={<EmptyStateChatInterface username={name}/>}
                 />
               ) : (
                 <>
