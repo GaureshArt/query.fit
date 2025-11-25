@@ -5,7 +5,7 @@
   "graphs": {
     "agent":{
       "path": "./utils/agent/agent.ts:default",
-      "stream_mode": ["messages"]
+      "stream_mode": ["messages","values"]
       
     }
   },
