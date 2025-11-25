@@ -4,6 +4,22 @@ import { registry } from "@langchain/langgraph/zod";
 import {addMessages} from "@langchain/langgraph"
 import { queryPlannerLlmSchema } from "./models";
 
+export const ROUTES = {
+  GENERATE_SCHEMA: "generateSchema",
+  GENERATE_QUERY: "generateQuery",
+  QUERY_CLARIFIER: "queryClarifier",
+  EXECUTE_QUERY: "executeQuery",
+  SUMMARIZE_OUTPUT: "summarizeOutput",
+  COMPLEX_QUERY_APPROVAL: "complexQueryApproval",
+  QUERY_PLANNER: "queryPlanner",
+  GENERAL_CHAT: "generalChat",
+  VALIDATOR: "validator",
+  ORCHESTRATOR: "orchestrator",
+  END: "__end__",
+} as const;
+
+
+
 export const graphState = z.object({
   messages: z.array(z.custom<BaseMessage>()).register(registry, {
     reducer: {
