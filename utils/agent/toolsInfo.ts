@@ -28,6 +28,11 @@ export const TOOL_REGISTRY = {
     when_to_use:
       "When the query is not SQL-related, or agent must talk normally.",
   },
+  generateChart: {
+    description: "Handles generation of ui chart for given query result",
+    when_to_use:
+      "Use when user ask for chart generate to show data in more visualize way",
+  },
   complexQueryApproval: {
     description:
       "Asks user permission before running modification/manipulation queries.",

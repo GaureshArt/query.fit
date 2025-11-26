@@ -10,14 +10,15 @@ import { ShimmeringText } from "@/components/external-ui/shimmering-text";
 import { Button } from "@/components/ui/button";
 import { DynamicTable } from "./dynamic-table";
 import { Spinner } from "@/components/ui/spinner";
-
+import GenerativeUi from "@/utils/agent/ui"
 interface IConversationInterfaceProps{
     state:GraphState,
     isLoading:boolean,
     interrupt: Interrupt<{id:string,value:string}> | undefined,
     submit:()=>void;
     disapproveSubmit:()=>void;
-    name:string
+    name:string,
+    
 }
 export default function ConversationInterface({state,isLoading,interrupt,name,submit,disapproveSubmit}:IConversationInterfaceProps) {
     return (
@@ -61,6 +62,12 @@ export default function ConversationInterface({state,isLoading,interrupt,name,su
                   {
                     isLoading ? <div className="flex gap-5 items-center "><Spinner /> <ShimmeringText className="inline-block" text={state.queryPlan?.steps[state.currentStepIndex]?.ui_message ?? "QueryFit is Thinking"}/></div>:""
                   }
+
+                 {
+                  state.ui?.config.type && 
+                    (GenerativeUi[state.ui.config.type]({chartData:state.ui.data,config:state.ui.config}))
+                  
+                 }
                   {interrupt && (
                     <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
                       interrupt: {interrupt.value?.value}

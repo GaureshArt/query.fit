@@ -2,7 +2,8 @@ import * as z from "zod";
 import { BaseMessage } from "@langchain/core/messages";
 import { registry } from "@langchain/langgraph/zod";
 import {addMessages} from "@langchain/langgraph"
-import { queryPlannerLlmSchema } from "./models";
+import { chartConfigSchema, queryPlannerLlmSchema } from "./models";
+
 
 export const ROUTES = {
   GENERATE_SCHEMA: "generateSchema",
@@ -42,6 +43,7 @@ export const graphState = z.object({
       "complexQueryApproval",
       "queryPlanner",
       "generalChat",
+      "generateChart",
       "validator",
       "orchestrator",
       "__end__"
@@ -54,10 +56,10 @@ export const graphState = z.object({
   answeredQuery: z.boolean().optional(),
   feedback: z.string().optional(),
   validatorScore:z.number().optional(),
- ui: z
-    .array(z.unknown()) 
-    .optional()
-    .default([]),
+  ui:z.object({
+    config:chartConfigSchema,
+    data:z.any()
+  }),
   queryPlan: z.custom<z.infer<typeof queryPlannerLlmSchema>>().optional(),
 });
 

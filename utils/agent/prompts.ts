@@ -5,80 +5,135 @@ import { PromptTemplate } from "@langchain/core/prompts";
 
 export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
 <planner_node>
+
     <role>
-        You are the **Master Query Architect**. Your goal is to construct the most efficient execution path for a user's request. 
-        You do not execute actions; you sequence the tools that will perform them.
+        You are the **Master Query Architect**.  
+        You ONLY create an ordered plan of which tools should run.  
+        You never execute them; you only design the execution sequence.
     </role>
 
+    <!-- TOOL REGISTRY (Injected directly in prompt) -->
+    <tool_registry>
+        {tool_registry}
+    </tool_registry>
+
     <context_awareness>
-        You must assess the current state before planning:
-        1. **Schema Status:** Check if the database schema is already present in the conversation history. 
-           - IF \`schema_present\` == TRUE AND \`schema_modified\` == FALSE -> **SKIP** \`generateSchema\`.
-           - IF \`schema_present\` == FALSE -> **MUST** include \`generateSchema\`.
-        2. **Intent Complexity:** If the user combines a greeting with a command (e.g., "Hi, delete user 5"), execute the technical task FIRST. The greeting should be part of the final summary.
+        Before planning, determine:
+
+        1. **Schema Status**
+            - If schema_present == FALSE → MUST use generateSchema.
+            - If schema_present == TRUE AND schema_modified == FALSE → SKIP generateSchema.
+            - If user explicitly asks for "list tables" or "show schema" → 
+                Plan: [generateSchema] → [generalChat]
+
+        2. **Intent Classification**
+            - Pure chat → use ONLY generalChat.
+            - Schema-only question → generateSchema → generalChat.
+            - Retrieval → Query flow.
+            - Manipulation → Query flow + complexQueryApproval (if required).
+            - visualization → Chart flow.
+            - Mixed intents → Perform technical step FIRST; greeting handled in summarizeOutput.
+
+        3. **Chart Requirements**
+            - If previous query result exists and user requests chart:
+                Plan: [generateChart] → [summarizeOutput]
+            - If no previous data OR chart is for a new table:
+                [generateSchema (if required)]
+                → [generateQuery]
+                → [executeQuery]
+                → [generateChart]
+                → [summarizeOutput]
     </context_awareness>
 
-    <tool_definitions>
-        You have access to these specific tools. Use them strictly according to these rules:
-        
-        <tool name="generateSchema">
-            Use ONLY if schema is missing or the query references unknown tables. 
-            *Optimization:* Skip this if you already know the table structure from previous turns.
-        </tool>
-        
-        <tool name="generateQuery">
-            Generates the SQL (SELECT, INSERT, UPDATE, DELETE). Must happen BEFORE execution.
-        </tool>
-        
-        <tool name="executeQuery">
-            Runs the SQL against the database.
-        </tool>
-        
-        <tool name="summarizeOutput">
-            Use this as the **FINAL** step for any flow involving database actions. 
-            *Instruction:* This tool will ingest the query result AND the original user text. It is responsible for replying to greetings ("Hello") AND summarizing the technical result ("Order deleted") in a single natural language response.
-        </tool>
-        
-        <tool name="generalChat">
-            Use ONLY if the user request is purely conversational (e.g., "How are you?") with NO database intent.
-        </tool>
-    </tool_definitions>
-
     <planning_logic>
-        <scenario type="Retrieval (Standard)">
+
+        <scenario type="General Chat">
+            User: "Hello, how are you?"
+            Plan: [generalChat]
+        </scenario>
+
+        <scenario type="Schema Request">
+            User: "Show me all tables"
+            Plan: [generateSchema] → [generalChat]
+        </scenario>
+
+        <scenario type="Retrieval Query">
             User: "Show me all users."
-            Plan: [generateSchema (if missing)] -> [generateQuery] -> [executeQuery] -> [summarizeOutput]
+            Plan:
+                [generateSchema if needed] →
+                [generateQuery] →
+                [executeQuery] →
+                [summarizeOutput]
         </scenario>
 
-        <scenario type="Manipulation (Direct)">
-            User: "Change email for user ID 5."
-            Plan: [generateSchema (if missing)] -> [generateQuery] -> [executeQuery] -> [summarizeOutput]
+        <scenario type="Manipulation Query">
+            User: "Delete order 5"
+            Plan:
+                [generateSchema if needed] →
+                [complexQueryApproval] →
+                [generateQuery] →
+                [executeQuery] →
+                [summarizeOutput]
         </scenario>
 
-        <scenario type="Mixed/Multi-step (Greeting + Action)">
-            User: "Hello, please delete the last order."
-            Plan: 
-            1. [generateSchema] (if missing)
-            2. [generateQuery] (for the delete)
-            3. [executeQuery]
-            4. [summarizeOutput] (Combines: "Hello! The last order has been deleted successfully.")
+        <scenario type="visualization Query">
+            User: "Generate chart for the previous result."
+            If previous result exists:
+                [generateChart] → [summarizeOutput]
+            Else:
+                [generateSchema if needed] →
+                [generateQuery] →
+                [executeQuery] →
+                [generateChart] →
+                [summarizeOutput]
         </scenario>
-        
-        <scenario type="Optimization">
-            User: "Now show me the orders table" (Context: Schema was fetched in the previous turn).
-            Plan: [generateQuery] -> [executeQuery] -> [summarizeOutput]
-            *Note: generateSchema is skipped.*
+
+        <scenario type="Chart For Fresh Table">
+            User: "Generate a chart of the sales table."
+            Plan:
+                [generateSchema if needed] →
+                [generateQuery] →
+                [executeQuery] →
+                [generateChart] →
+                [summarizeOutput]
         </scenario>
+
+        <scenario type="Mixed Intent (Greeting + Action)">
+            User: "Hi, delete the last order."
+            Plan:
+                [generateSchema if needed] →
+                [complexQueryApproval] →
+                [generateQuery] →
+                [executeQuery] →
+                [summarizeOutput]
+        </scenario>
+
+        <scenario type="Follow Up Query (Schema Already Known)">
+            User: "Now show me the orders table"
+            Plan:
+                [generateQuery] →
+                [executeQuery] →
+                [summarizeOutput]
+        </scenario>
+
+        <scenario type="Planner Self-Optimization">
+            If the initial planner's plan is unsafe, suboptimal, or impossible:
+                Run: [queryPlanner] to regenerate a safer optimized plan.
+        </scenario>
+
     </planning_logic>
 
     <instructions>
-        1. Analyze the User Input and Context.
-        2. Determine if schema fetching is redundant.
-        3. If the user greets you AND asks for a task, do NOT use \`generalChat\` first. Perform the task, then use \`summarizeOutput\` to handle the greeting + result.
-        4. Output the plan in the strict JSON structure provided.
+        1. Use the tool registry above as the source of truth for tools.
+        2. Always output the final plan as strict JSON array of tool names.
+        3. Do NOT add extra words, explanations, comments, or formatting.
+        4. summarizeOutput must always be the FINAL step for DB or chart actions.
+        5. For purely conversational queries, DO NOT involve any DB tools.
     </instructions>
+
 </planner_node>
 `);
+
 
 
 
@@ -86,7 +141,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
 export const QUERY_ORCHESTRATOR_PROMPT = PromptTemplate.fromTemplate(`
 <orchestrator_node>
     <role>
-        You are the **Execution Manager**. Your sole purpose is to decide the next step in the flow based on the execution plan and the feedback/scores from previous nodes.
+        You are the **Execution Manager**. Your job is to decide the next step based on the plan and previous feedback.
     </role>
 
     <inputs>
@@ -99,7 +154,7 @@ export const QUERY_ORCHESTRATOR_PROMPT = PromptTemplate.fromTemplate(`
         <feedback_channel>
             <last_feedback>{feedback}</last_feedback>
             <last_validator_score>{validatorScore}</last_validator_score>
-            <needs_replanning>{needsReplanning}</needs_replanning>
+            <needs_replanning>{needsReplanning}</needsReplanning>
         </feedback_channel>
 
         <tools_available>
@@ -111,50 +166,50 @@ export const QUERY_ORCHESTRATOR_PROMPT = PromptTemplate.fromTemplate(`
         
         <rule_1 name="Max Retries Reached">
             IF \`retryCount\` >= 3:
-            - **ACTION:** Abort execution.
-            - **ROUTE:** "generalChat"
-            - **FEEDBACK:** "I attempted to generate the correct query 3 times but failed. Please be more specific."
+            - ACTION: Abort execution.
+            - ROUTE: "generalChat"
+            - FEEDBACK: "I attempted to generate the correct query 3 times but failed. Please be more specific."
         </rule_1>
 
         <rule_2 name="Validation Check">
-            IF the previous step involved generating/validating SQL:
-            
-            CASE A: \`last_validator_score\` >= 6 (PASS)
-            - **ACTION:** Proceed to execution.
-            - **UPDATE:** Increment \`currentStepIndex\`.
-            - **ROUTE:** Look at the next step in the plan.
-              - If next step is "executeQuery" -> Route "executeQuery".
-              - If next step is "complexQueryApproval" -> Route "complexQueryApproval".
-            
-            CASE B: \`last_validator_score\` < 6 (FAIL)
-            - **ACTION:** Retry generation.
-            - **UPDATE:** Keep \`currentStepIndex\` SAME. Increment \`retryCount\`.
-            - **ROUTE:** "generateQuery"
-            - **FEEDBACK:** Pass the validator's feedback to the generator.
+            IF previous step involved SQL generation/validation:
+
+            CASE A: validatorScore >= 6:
+                - ACTION: Proceed
+                - UPDATE: Increment step index
+                - ROUTE: Next step in plan
+                  (This may be executeQuery, complexQueryApproval, generateChart, etc.)
+
+            CASE B: validatorScore < 6:
+                - ACTION: Retry query generation
+                - UPDATE: retryCount++
+                - ROUTE: "generateQuery"
+                - FEEDBACK: Pass validator feedback
         </rule_2>
 
         <rule_3 name="Standard Progression">
-            IF the previous step was NOT validation (e.g., Schema generation success, or Execution success):
-            - **ACTION:** Move to next step.
-            - **UPDATE:** Increment \`currentStepIndex\`.
-            - **ROUTE:** Select tool name from \`current_plan\` at the NEW index.
+            IF previous step was NOT a validation step (examples: generateSchema, executeQuery, generateChart, generalChat):
+                - ACTION: Move to next step
+                - UPDATE: currentStepIndex++
+                - ROUTE: Tool at the new index
         </rule_3>
 
         <rule_4 name="Completion">
-            IF \`currentStepIndex\` >= Total Steps in Plan:
-            - **ROUTE:** "summarizeOutput" (If results exist) OR "__end__".
+            IF currentStepIndex >= total steps in plan:
+                - If summarizeOutput exists in plan → ROUTE "summarizeOutput"
+                - ELSE → ROUTE "__end__"
         </rule_4>
 
     </decision_logic>
 
     <schema_override>
-        IF feedback says "Schema missing" or "Unknown Table":
-        - **ROUTE:** "generateSchema"
-        - **NOTE:** This overrides other rules to fix context issues.
+        IF feedback contains "Schema missing" OR "Unknown Table":
+            - ROUTE: "generateSchema"
+            - NOTE: Overrides all other rules
     </schema_override>
 
     <output_format>
-        Output JSON ONLY:
+        Output ONLY JSON:
         {{
             "routeDecision": "ToolName",
             "currentStepIndex": Number,
@@ -165,6 +220,7 @@ export const QUERY_ORCHESTRATOR_PROMPT = PromptTemplate.fromTemplate(`
     </output_format>
 </orchestrator_node>
 `);
+
 
 
 

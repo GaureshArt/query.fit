@@ -4,6 +4,7 @@ import {
   complexQueryApproval,
   executeQuery,
   generalChat,
+  generateChartData,
   generateQuery,
   generateSchema,
   orchestrator,
@@ -20,6 +21,7 @@ const QueryFitAgent = new StateGraph(graphState)
   .addNode("orchestrator", orchestrator)
   .addNode("validator", validator)
   .addNode("generalChat", generalChat)
+  .addNode("generateChart", generateChartData)
   .addNode("queryClarifier", queryClarifier, {
     ends: ["generateQuery"],
   })
@@ -36,6 +38,7 @@ const QueryFitAgent = new StateGraph(graphState)
     "orchestrator",
     (state: GraphState) => state.routeDecision ?? "orchestrator",
     {
+      generateChart:"generateChart",
       generateSchema: "generateSchema",
       generateQuery: "generateQuery",
       queryClarifier: "queryClarifier",
@@ -57,7 +60,9 @@ const QueryFitAgent = new StateGraph(graphState)
   .addEdge("executeQuery","orchestrator")
   .addEdge("summarizeOutput","__end__")
   .addEdge("queryPlanner","orchestrator")
+  .addEdge("generateChart","orchestrator")
   .addEdge("generalChat","__end__")
+  .addEdge("queryClarifier","__end__")
   .addConditionalEdges("validator",(state:GraphState)=>state.routeDecision ?? "orchestrator",{
     orchestrator:"orchestrator",
     generateQuery:"generateQuery"

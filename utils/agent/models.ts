@@ -20,7 +20,7 @@ export const queryPlannerLlmSchema = z.object({
       "general",
       "retrieval",
       "manipulation",
-      "visual-analytical",
+      "visualization",
       "multi-step",
     ])
     .describe(
@@ -36,6 +36,7 @@ export const queryPlannerLlmSchema = z.object({
           "generateQuery",
           "queryPlanner",
           "executeQuery",
+          "generateChart",
           "summarizeOutput",
           "generalChat",
           "complexQueryApproval",
@@ -73,6 +74,7 @@ export const queryOrchestratorLlmSchema = z.object({
       "validator",
       "orchestrator",
       "summarizeOutput",
+      "generateChart",
       "generalChat",
       "complexQueryApproval",
       "queryPlanner",
@@ -142,14 +144,6 @@ export const queryAnswerSummarizerLlm = new ChatGoogleGenerativeAI({
 });
 
 // ----------------------------------------
-// Chart Generator (Text Only)
-// ----------------------------------------
-export const chartGeneratorLlm = new ChatGoogleGenerativeAI({
-  ...commonConfig,
-  temperature: 0,
-});
-
-// ----------------------------------------
 // General Chat Model
 // ----------------------------------------
 export const generalChatLlm = new ChatGoogleGenerativeAI({
@@ -184,3 +178,34 @@ export const queryClarifierLlm = new ChatGoogleGenerativeAI({
   ...commonConfig,
   temperature: 0,
 }).withStructuredOutput(queryClarifierSchema, { name: "clarifier_output" });
+
+
+
+
+
+
+export const chartConfigSchema = z.object({
+  title: z.string().describe("A short, descriptive title for the chart"),
+  description: z.string().describe("A short description or subtitle"),
+  type: z.enum(["bar", "line", "pie"]).describe(" The type of chart to render"),
+  
+  // The Key for the X-Axis (The Grouping)
+  xAxisKey: z.string().describe("Choose exact same data key name from query result"),
+  
+  // The Keys for the Data Series (The Bars)
+  series: z.array(
+    z.object({
+      dataKey: z.string().describe("Choose exact same data key name from query result"),
+      label: z.string().describe("Human-readable label for the legend/tooltip (e.g., 'Desktop Sales')"),
+      color: z.string().optional().describe("Optional hex code, otherwise frontend assigns defaults"),
+      stackedId: z.string().optional().describe("If the chart should be stacked, give same ID to series that belong together"),
+    })
+  ).describe("Array of data series to plot. For a simple bar chart, this often has just one item."),
+});
+
+// The Full Response expected from LLM
+
+
+export const chartGeneratorLlm = new ChatGoogleGenerativeAI({
+  ...commonConfig
+}).withStructuredOutput(chartConfigSchema,{name:"chart_generator"})

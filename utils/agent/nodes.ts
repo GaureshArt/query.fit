@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import {
+  chartGeneratorLlm,
   generalChatLlm,
   queryAnswerSummarizerLlm,
   queryClarifierLlm,
@@ -32,7 +33,8 @@ import {
 } from "@langchain/langgraph";
 import { TOOL_REGISTRY } from "./toolsInfo";
 import { withFaultTolerance } from "./wrapper";
-
+import { typedUi } from "@langchain/langgraph-sdk/react-ui/server";
+import type ComponentMap from "./ui";
 export const generateSchema = withFaultTolerance(async (state: GraphState) => {
   if (state.schema) {
     return {
@@ -101,21 +103,14 @@ export const queryClarifier = withFaultTolerance(async (state: GraphState) => {
     feedback: state.feedback,
     userMessage: state.messages.at(-1)?.content,
   });
-
   const res = await queryClarifierLlm.invoke([
     new SystemMessage(prompt),
     ...state.messages,
   ]);
-
-  const interruptor = interrupt(res.message);
-
-  return new Command({
-    update: {
-      messages: [new HumanMessage(interruptor)],
-      feedback: interruptor,
-    },
-    goto: ROUTES.GENERATE_QUERY,
-  });
+  return {
+    messages: [new AIMessage(res.message)],
+    routeDecision:ROUTES.END
+  };
 });
 
 export const executeQuery = withFaultTolerance(async (state: GraphState) => {
@@ -184,11 +179,15 @@ export const complexQueryApproval =
 
 export const queryPlanner = withFaultTolerance(
   async (state: GraphState, config?: LangGraphRunnableConfig) => {
+    const prompt = await QUERY_PLANNER_PROMPT.format({
+      tool_registry:JSON.stringify(TOOL_REGISTRY)
+    })
     const res = await queryPlannerLlm.invoke([
-      new SystemMessage(QUERY_PLANNER_PROMPT),
+      new SystemMessage(prompt),
       ...state.messages,
     ]);
 
+   
     return {
       queryPlan: res,
       feedback: "Start executing steps now",
@@ -314,6 +313,19 @@ export const generalChat = withFaultTolerance(async (state: GraphState) => {
   };
 });
 
+
+
+export const generateChartData = withFaultTolerance(async (state:GraphState)=>{
+  const res = await chartGeneratorLlm.invoke([new SystemMessage(`Based on given data: ${state.queryResult.slice(0,5)} choose best chart ytpe to show data perfectly for given user request:  give output in given JSON format only.`), ...state.messages]);
+  return {
+    ui:{
+      config:res,
+      data:state.queryResult
+    },
+    feedback:"Chart generate successfully. now summerize data",
+    routeDecision:ROUTES.ORCHESTRATOR
+  }
+})
 // export const generateChartData = async (state: GraphState) => {
 //   try {
 //     const { messages, queryResult } = state;

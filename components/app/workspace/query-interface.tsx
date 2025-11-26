@@ -9,7 +9,6 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useUserInfo } from "@/lib/user-store";
 import ConversationInterface from "./conversation-interface";
 import PromptInput, { formSchema } from "./prompt-input";
-import { interrupt } from "@langchain/langgraph";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
@@ -65,6 +64,8 @@ export default function QueryInterface() {
               });
             }}
           />
+
+         
         </div>
 
         <div
