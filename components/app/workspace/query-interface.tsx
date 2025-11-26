@@ -9,12 +9,13 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useUserInfo } from "@/lib/user-store";
 import ConversationInterface from "./conversation-interface";
 import PromptInput, { formSchema } from "./prompt-input";
+import { interrupt } from "@langchain/langgraph";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session-id");
   const { name: userName } = useUserInfo();
-  const thread = useStream<GraphState, { InterruptType: string }>({
+  const thread = useStream<GraphState, { InterruptType: {id:string,value:string} }>({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",

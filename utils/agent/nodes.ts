@@ -158,11 +158,9 @@ export const executeQuery = withFaultTolerance(async (state: GraphState) => {
   }
 });
 
-export const complexQueryApproval = withFaultTolerance(
+export const complexQueryApproval = 
   async (state: GraphState) => {
-    const approved = interrupt(
-      "The generated query may manipulate data. Do you want to proceed?"
-    );
+    const approved = interrupt({value:"The generated query may manipulate data. Do you want to proceed?",id:"ComplexQueryApproval"});
 
     if (approved.shouldContinue) {
       return new Command({
@@ -176,13 +174,13 @@ export const complexQueryApproval = withFaultTolerance(
 
     return new Command({
       update: {
-        feedback: "User disapproved query",
+        feedback: "User disapproved manipulation query. End the query by giving proper feed back to the user i.e. You disapprove the query you can ask new query.",
         routeDecision: ROUTES.ORCHESTRATOR,
       },
       goto: ROUTES.ORCHESTRATOR,
     });
   }
-);
+
 
 export const queryPlanner = withFaultTolerance(
   async (state: GraphState, config?: LangGraphRunnableConfig) => {

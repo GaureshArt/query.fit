@@ -14,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 interface IConversationInterfaceProps{
     state:GraphState,
     isLoading:boolean,
-    interrupt:Interrupt<string> | undefined,
+    interrupt: Interrupt<{id:string,value:string}> | undefined,
     submit:()=>void;
     disapproveSubmit:()=>void;
     name:string
@@ -63,7 +63,8 @@ export default function ConversationInterface({state,isLoading,interrupt,name,su
                   }
                   {interrupt && (
                     <div className="w-full px-4 py-2 border rounded-md text-red-400 font-bold">
-                      {interrupt.value as string}
+                      interrupt: {interrupt.value?.value}
+                      
                       <div className="flex gap-4">
                         <SlideToUnlock
                           className=" w-70 h-10 rounded-md"
