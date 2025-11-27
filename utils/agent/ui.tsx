@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import {
   ChartConfig,
@@ -76,13 +76,68 @@ export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
   );
 }
 
-const lineChart = () => (
+const DynamiclineChart = ({config,chartData}: DynamicChartProps) =>{
+  const chartConfig = useMemo(() => {
+    const generatedConfig: ChartConfig = {};
+
+    config.series.forEach((item, index) => {
+      generatedConfig[item.dataKey] = {
+        label: item.label,
+        color: CHART_COLORS[index % CHART_COLORS.length],
+      };
+    });
+
+    return generatedConfig;
+  }, [config]);
+ return (
   <>
-    <div className={cn("bg-yellow-200")}>
-      <h1>THis is line chart</h1>
+    <div className={cn("border border-zinc-700 rounded-md px-4 py-2 w-full overflow-x-scroll")}>
+      <ChartContainer config={chartConfig} className="w-full">
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+            >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey={config.xAxisKey}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              
+            />
+            <YAxis/>
+            <ChartTooltip
+              cursor={true}
+              content={<ChartTooltipContent  />}
+              />
+            {
+              config.series.map((item)=>(
+                <Line
+                key={item.label}
+                dataKey={item.dataKey}
+                type="natural"
+                stroke="black"
+                strokeWidth={2}
+                dot={{
+                  fill: "black",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+                />
+              ))
+              
+            }
+          </LineChart>
+              </ ChartContainer>
     </div>
   </>
-);
+)
+};
 const pieChart = () => (
   <>
     <div className={cn("bg-green-200")}>
@@ -92,7 +147,7 @@ const pieChart = () => (
 );
 
 export default {
-  line: lineChart,
+  line: DynamiclineChart,
   bar: DynamicBarChart,
   pie: pieChart,
 };
