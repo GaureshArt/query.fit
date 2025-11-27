@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, Legend, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 import {
   ChartConfig,
@@ -138,16 +138,57 @@ const DynamiclineChart = ({config,chartData}: DynamicChartProps) =>{
   </>
 )
 };
-const pieChart = () => (
-  <>
-    <div className={cn("bg-green-200")}>
-      <h1>THis is pie chart</h1>
+
+
+export function DynamicPieChart({ chartData, config }: DynamicChartProps) {
+  const chartConfig = useMemo(() => {
+    const generatedConfig: ChartConfig = {};
+
+    config.series.forEach((item, index) => {
+      generatedConfig[item.dataKey] = {
+        label: item.label,
+        color: CHART_COLORS[index % CHART_COLORS.length],
+      };
+    });
+
+    return generatedConfig;
+  }, [config]);
+
+  const valueKey = config.series[0].dataKey;  
+  return (
+    <div className="w-[350px] h-[350px] mx-auto">
+      <ChartContainer
+        config={chartConfig}
+        className="aspect-square max-h-[300px] mx-auto "
+      >
+        <PieChart>
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Legend />
+
+          <Pie
+            data={chartData}
+            dataKey={valueKey}
+            nameKey={config.xAxisKey}
+            cx="50%"
+            cy="50%"
+            outerRadius="80%"
+           
+          >
+            <LabelList
+              dataKey={config.xAxisKey}
+              position="outside"
+              className="fill-red-400"
+              fontSize={12}
+            />
+          </Pie>
+        </PieChart>
+      </ChartContainer>
     </div>
-  </>
-);
+  );
+}
 
 export default {
   line: DynamiclineChart,
   bar: DynamicBarChart,
-  pie: pieChart,
+  pie: DynamicPieChart,
 };
