@@ -5,6 +5,7 @@ import {
   queryAnswerSummarizerLlm,
   queryClarifierLlm,
   queryGeneratorLlm,
+  queryOrchestratorLlm,
   queryOrchestratorLlmMistral,
   queryPlannerLlm,
   validatorLlm,
@@ -18,6 +19,7 @@ import {
 import path from "path";
 import os from "os";
 import {
+  CHART_GENERATOR_PROMPT,
   GENERAL_CHAT_PROMPT,
   QUERY_ANSWER_SUMMARIZER_SYSTEM_PROMPT,
   QUERY_CLARIFIER_PROMPT,
@@ -316,7 +318,12 @@ export const generalChat = withFaultTolerance(async (state: GraphState) => {
 
 
 export const generateChartData = withFaultTolerance(async (state:GraphState)=>{
-  const res = await chartGeneratorLlm.invoke([new SystemMessage(`Based on given data: ${state.queryResult.slice(0,5)} choose best chart ytpe to show data perfectly for given user request:  give output in given JSON format only.`), ...state.messages]);
+
+  const prompt = await CHART_GENERATOR_PROMPT.format({
+    queryResult:JSON.stringify(state.queryResult.slice(0,5)),
+    chatHistory:JSON.stringify(state.messages.slice(-3))
+  })
+  const res = await chartGeneratorLlm.invoke([new SystemMessage(prompt), ...state.messages]);
   return {
     ui:{
       config:res,
@@ -326,45 +333,3 @@ export const generateChartData = withFaultTolerance(async (state:GraphState)=>{
     routeDecision:ROUTES.ORCHESTRATOR
   }
 })
-// export const generateChartData = async (state: GraphState) => {
-//   try {
-//     const { messages, queryResult } = state;
-
-//     if (!queryResult || queryResult.length === 0) {
-//       return { error: "No data available to generate a chart." };
-//     }
-//     const question = messages.at(-1)?.content as string;
-//     if (!question) {
-//       return { error: "No user question found in history." };
-//     }
-//     const dataSample = queryResult.slice(0, 10);
-//     const formattedPrompt = await CHART_GENERATOR_PROMPT.format({
-//       data: JSON.stringify(dataSample),
-//       request: question,
-//     });
-//     const res = await chartGeneratorLlm.invoke(formattedPrompt);
-//     const content = res.content as string;
-//     let chartSpec: object;
-//     try {
-//       const jsonMatch = content.match(/```json\n([\s\S]*?)\n```|({[\s\S]*})/);
-//       if (!jsonMatch) {
-//         throw new Error("No valid JSON object found in the LLM response.");
-//       }
-//       const jsonString = jsonMatch[1] ?? jsonMatch[0];
-//       chartSpec = JSON.parse(jsonString);
-//     } catch (parseError: any) {
-//       console.error("Failed to parse chart spec:", content, parseError);
-//       return {
-//         error: `The AI returned an invalid chart format. ${parseError.message}`,
-//       };
-//     }
-//     return {
-//       chartSpec: chartSpec,
-//     };
-//   } catch (err: unknown) {
-//     if (err instanceof Error) {
-//       return { error: `Failed to generate chart: ${err.message}` };
-//     }
-//     return { error: "An unknown error occurred while generating the chart." };
-//   }
-// };

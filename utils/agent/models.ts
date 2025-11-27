@@ -189,10 +189,10 @@ export const chartConfigSchema = z.object({
   description: z.string().describe("A short description or subtitle"),
   type: z.enum(["bar", "line", "pie"]).describe(" The type of chart to render"),
   
-  // The Key for the X-Axis (The Grouping)
+  
   xAxisKey: z.string().describe("Choose exact same data key name from query result"),
   
-  // The Keys for the Data Series (The Bars)
+  
   series: z.array(
     z.object({
       dataKey: z.string().describe("Choose exact same data key name from query result"),
@@ -203,7 +203,7 @@ export const chartConfigSchema = z.object({
   ).describe("Array of data series to plot. For a simple bar chart, this often has just one item."),
 });
 
-// The Full Response expected from LLM
+
 
 
 export const chartGeneratorLlm = new ChatGoogleGenerativeAI({

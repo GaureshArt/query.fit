@@ -47,7 +47,7 @@ export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
           <CartesianGrid vertical={false} />
 
           <XAxis
-            dataKey={"Country"}
+            dataKey={config.xAxisKey}
             tickLine={false}
             tickMargin={10}
             axisLine={false}
@@ -64,7 +64,7 @@ export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
           {config.series.map((item) => (
             <Bar
               key={item.dataKey}
-              dataKey={"total_sales"}
+              dataKey={item.dataKey}
               stackId={item.stackedId}
               fill={`var(--color-${item.dataKey})`}
               radius={[4, 4, 0, 0]}
