@@ -9,6 +9,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useUserInfo } from "@/lib/user-store";
 import ConversationInterface from "./conversation-interface";
 import PromptInput, { formSchema } from "./prompt-input";
+import { toast, Toaster } from "sonner";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
@@ -27,6 +28,10 @@ export default function QueryInterface() {
   }
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    if(!data.query.trim()){
+      toast.error("Enter valid query")
+      return;
+    }
     thread.submit({
       messages: [new HumanMessage(data.query)],
       dbId: sessionId,
@@ -34,6 +39,7 @@ export default function QueryInterface() {
   };
   return (
     <>
+      <Toaster/>
       <div
         className={cn(
           "flex flex-col justify-center w-full  md:w-4/5 border-zinc-300  ",

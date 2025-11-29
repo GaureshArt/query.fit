@@ -31,10 +31,10 @@ export default function PromptInput({ isSidebarOpen, submit }: IPromptInput) {
         isSidebarOpen ? "md:w-4/6" : ""
       )}
     >
-      <Toaster position="top-center" richColors />
       <form
-        onSubmit={() => {
-          form.handleSubmit(submit);
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit(submit)();
           form.reset();
         }}
         className="relative w-full  border-none"
@@ -59,6 +59,7 @@ export default function PromptInput({ isSidebarOpen, submit }: IPromptInput) {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
+
                     form.handleSubmit(submit)();
                     form.reset()
                   }
