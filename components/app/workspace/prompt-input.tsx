@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import PromptSendSvg from "@/public/app-svgs/prompt-send-svg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { Toaster } from "sonner";
 import z from "zod";
 
 interface IPromptInput {
