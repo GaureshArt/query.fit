@@ -41,8 +41,8 @@ export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
   }, [config]);
 
   return (
-    <div className="w-2/3 h-[400px]">
-      <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+    <div className="w-full max-h-[400px]">
+      <ChartContainer config={chartConfig} className="min-h-[100px] w-full">
         <BarChart accessibilityLayer data={chartData}>
           <CartesianGrid vertical={false} />
 

@@ -239,7 +239,7 @@ export const orchestrator = withFaultTolerance(async (state: GraphState) => {
     validatorScore: state.validatorScore?.toString() ?? "0",
   });
 
-  const res = await queryOrchestratorLlmMistral.invoke(
+  const res = await queryOrchestratorLlm.invoke(
     [new SystemMessage(prompt), ...state.messages],
     { recursionLimit: 10 }
   );

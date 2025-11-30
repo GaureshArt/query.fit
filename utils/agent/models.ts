@@ -100,6 +100,7 @@ export const queryOrchestratorLlmSchema = z.object({
 
 export const queryOrchestratorLlm = new ChatGoogleGenerativeAI({
   ...commonConfig,
+  model:"gemini-2.5-pro",
   temperature: 0,
 }).withStructuredOutput(queryOrchestratorLlmSchema, {
   name: "orchestrator_output",
@@ -151,9 +152,6 @@ export const generalChatLlm = new ChatGoogleGenerativeAI({
   temperature: 0.3,
 });
 
-// ----------------------------------------
-// Validator Model
-// ----------------------------------------
 export const validatorLlmSchema = z.object({
   feedback: z
     .string()
