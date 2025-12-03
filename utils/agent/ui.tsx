@@ -1,6 +1,18 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Bar, BarChart, CartesianGrid, LabelList, Legend, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import {
   ChartConfig,
@@ -29,14 +41,12 @@ type DynamicChartProps = {
 export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
   const chartConfig = useMemo(() => {
     const generatedConfig: ChartConfig = {};
-
     config.series.forEach((item, index) => {
       generatedConfig[item.dataKey] = {
         label: item.label,
         color: CHART_COLORS[index % CHART_COLORS.length],
       };
     });
-
     return generatedConfig;
   }, [config]);
 
@@ -51,9 +61,8 @@ export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
             tickLine={false}
             tickMargin={10}
             axisLine={false}
-            tickFormatter={(value) => {
-              return value;
-            }}
+            tick={false}
+        
           />
 
           <YAxis tickLine={false} axisLine={false} tickMargin={10} />
@@ -76,7 +85,7 @@ export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
   );
 }
 
-const DynamiclineChart = ({config,chartData}: DynamicChartProps) =>{
+const DynamiclineChart = ({ config, chartData }: DynamicChartProps) => {
   const chartConfig = useMemo(() => {
     const generatedConfig: ChartConfig = {};
 
@@ -89,10 +98,14 @@ const DynamiclineChart = ({config,chartData}: DynamicChartProps) =>{
 
     return generatedConfig;
   }, [config]);
- return (
-  <>
-    <div className={cn("border border-zinc-700 rounded-md px-4 py-2 w-full overflow-x-scroll")}>
-      <ChartContainer config={chartConfig} className="w-full">
+  return (
+    <>
+      <div
+        className={cn(
+          "border border-zinc-700 rounded-md px-4 py-2 w-full overflow-x-scroll"
+        )}
+      >
+        <ChartContainer config={chartConfig} className="w-full">
           <LineChart
             accessibilityLayer
             data={chartData}
@@ -100,23 +113,18 @@ const DynamiclineChart = ({config,chartData}: DynamicChartProps) =>{
               left: 12,
               right: 12,
             }}
-            >
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey={config.xAxisKey}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              
             />
-            <YAxis/>
-            <ChartTooltip
-              cursor={true}
-              content={<ChartTooltipContent  />}
-              />
-            {
-              config.series.map((item)=>(
-                <Line
+            <YAxis />
+            <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
+            {config.series.map((item) => (
+              <Line
                 key={item.label}
                 dataKey={item.dataKey}
                 type="natural"
@@ -128,17 +136,14 @@ const DynamiclineChart = ({config,chartData}: DynamicChartProps) =>{
                 activeDot={{
                   r: 6,
                 }}
-                />
-              ))
-              
-            }
+              />
+            ))}
           </LineChart>
-              </ ChartContainer>
-    </div>
-  </>
-)
+        </ChartContainer>
+      </div>
+    </>
+  );
 };
-
 
 export function DynamicPieChart({ chartData, config }: DynamicChartProps) {
   const chartConfig = useMemo(() => {
@@ -154,7 +159,7 @@ export function DynamicPieChart({ chartData, config }: DynamicChartProps) {
     return generatedConfig;
   }, [config]);
 
-  const valueKey = config.series[0].dataKey;  
+  const valueKey = config.series[0].dataKey;
   return (
     <div className="w-[350px] h-[350px] mx-auto">
       <ChartContainer
@@ -172,7 +177,6 @@ export function DynamicPieChart({ chartData, config }: DynamicChartProps) {
             cx="50%"
             cy="50%"
             outerRadius="80%"
-           
           >
             <LabelList
               dataKey={config.xAxisKey}
