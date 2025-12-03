@@ -6,14 +6,12 @@ import {
   queryClarifierLlm,
   queryGeneratorLlm,
   queryOrchestratorLlm,
-  queryOrchestratorLlmMistral,
   queryPlannerLlm,
   validatorLlm,
 } from "./models";
 import { GraphState, ROUTES } from "./state";
 import {
   AIMessage,
-  HumanMessage,
   SystemMessage,
 } from "@langchain/core/messages";
 import path from "path";
@@ -35,8 +33,6 @@ import {
 } from "@langchain/langgraph";
 import { TOOL_REGISTRY } from "./toolsInfo";
 import { withFaultTolerance } from "./wrapper";
-import { typedUi } from "@langchain/langgraph-sdk/react-ui/server";
-import type ComponentMap from "./ui";
 export const generateSchema = withFaultTolerance(async (state: GraphState) => {
   if (state.schema) {
     return {
@@ -165,7 +161,7 @@ export const complexQueryApproval =
     if (approved.shouldContinue) {
       return new Command({
         update: {
-          feedback: "User approved query",
+          feedback: "User approved query. Now execute next step. i.e. go to executeQuery node",
           routeDecision: ROUTES.ORCHESTRATOR,
         },
         goto: ROUTES.ORCHESTRATOR,
@@ -192,9 +188,11 @@ export const queryPlanner = withFaultTolerance(
       ...state.messages,
     ]);
 
+   console.log("THis is queryPlanner:L ",res.raw.content)
+   console.log("THis is queryPlanner:BUT PArese ",JSON.parse(res.raw.content as string))
    
     return {
-      queryPlan: res,
+      queryPlan: res.parsed,
       feedback: "Start executing steps now",
       routeDecision: ROUTES.ORCHESTRATOR,
     };
@@ -223,7 +221,7 @@ export const validator = withFaultTolerance(async (state: GraphState) => {
   };
 });
 
-export const orchestrator = withFaultTolerance(async (state: GraphState) => {
+export const orchestrator =withFaultTolerance( async (state: GraphState) => {
   const queryPlan = state.queryPlan;
   const currentStepIndex = state.currentStepIndex;
   const retryCount = state.retryCount;
@@ -244,13 +242,31 @@ export const orchestrator = withFaultTolerance(async (state: GraphState) => {
     { recursionLimit: 10 }
   );
 
-  return {
-    feedback: res.feedback,
-    needsReplanning: res.needsReplanning,
-    retryCount: res.retryCount,
-    currentStepIndex: res.currentStepIndex,
-    routeDecision: res.routeDecision,
-  };
+  console.log("This is The message: ",(res.raw as AIMessage).content instanceof Array)
+  
+  const custom = JSON.parse(JSON.stringify((res.raw as AIMessage).content))
+  console.log("Custome: ",custom)
+  if((res.raw as AIMessage).content instanceof Array){
+    console.log("THis is array is true output",(res.raw as AIMessage).content[0])
+  }
+  if(res.parsed){
+
+    return {
+      feedback: res.parsed.feedback,
+      needsReplanning: res.parsed.needsReplanning,
+      retryCount: res.parsed.retryCount,
+      currentStepIndex: res.parsed.currentStepIndex,
+      routeDecision: res.parsed.routeDecision,
+    };
+  }
+    return {
+      feedback: custom.feedback,
+      needsReplanning: custom.needsReplanning,
+      retryCount: custom.retryCount,
+      currentStepIndex: custom.currentStepIndex,
+      routeDecision: custom.routeDecision,
+    };
+
 });
 
 export const summarizeOutput = withFaultTolerance(async (state: GraphState) => {
@@ -272,7 +288,7 @@ export const summarizeOutput = withFaultTolerance(async (state: GraphState) => {
     new SystemMessage(prompt),
     ...state.messages,
   ]);
-
+  
   return {
     messages: [
       new AIMessage({

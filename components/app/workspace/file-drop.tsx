@@ -21,6 +21,7 @@ import { toast, Toaster } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { useRef } from "react";
 import {  useRouter } from "next/navigation";
+import { useUserInfo } from "@/lib/user-store";
 
 export const uploadSchema = z.object({
   file: z
@@ -43,6 +44,7 @@ export const uploadSchema = z.object({
 
 export default function FileDrop() {
   const router = useRouter();
+  const {setDbid} = useUserInfo()
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<z.infer<typeof uploadSchema>>({
     resolver: zodResolver(uploadSchema),
@@ -74,8 +76,8 @@ export default function FileDrop() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      console.log('data: ',data)
-      
+
+      setDbid(data.dbId as string)
        router.push(`/workspace/query?session-id=${data.dbId}`)
     },
   });

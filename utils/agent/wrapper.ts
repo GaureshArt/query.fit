@@ -10,6 +10,7 @@ export const withFaultTolerance = <T extends GraphState>(
       return await nodeLogic(state, config);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
+      console.log("Yep this is get caught bytry")
       return {
         feedback: `System Error: ${errorMessage}. Analyze this error and try a different approach.`,
         retryCount: (state.retryCount || 0) + 1,

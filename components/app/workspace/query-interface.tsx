@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import * as z from "zod";
 import { useStream } from "@langchain/langgraph-sdk/react";
-import { GraphState } from "@/utils/agent/state";
+import { GraphState, ROUTES } from "@/utils/agent/state";
 import { HumanMessage } from "@langchain/core/messages";
 import { useSearchParams } from "next/navigation";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -68,6 +68,14 @@ export default function QueryInterface() {
               thread.submit(undefined, {
                 command: { resume: { shouldContinue: false } },
               });
+            }}
+            editQuerySubmit={(sqlQuery:string)=>{
+              thread.submit({
+                messages:[new HumanMessage(`Execute this query so dont go to the generate node go directly execute node . sql query: ${sqlQuery}`)],
+                sqlQuery,
+                
+                feedback:'Go directly to the execute query node.'
+              })
             }}
           />
 

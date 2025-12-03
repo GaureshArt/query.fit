@@ -57,7 +57,7 @@ export const queryPlannerLlmSchema = z.object({
 export const queryPlannerLlm = new ChatGoogleGenerativeAI({
   ...commonConfig,
   temperature: 0,
-}).withStructuredOutput(queryPlannerLlmSchema, { name: "planner_output" });
+}).withStructuredOutput(queryPlannerLlmSchema, { name: "planner_output" ,includeRaw:true});
 
 
 export const queryOrchestratorLlmSchema = z.object({
@@ -100,10 +100,12 @@ export const queryOrchestratorLlmSchema = z.object({
 
 export const queryOrchestratorLlm = new ChatGoogleGenerativeAI({
   ...commonConfig,
-  model:"gemini-2.5-pro",
+  model:"gemini-2.5-flash",
   temperature: 0,
 }).withStructuredOutput(queryOrchestratorLlmSchema, {
   name: "orchestrator_output",
+  
+  includeRaw:true
 });
 
 
@@ -114,11 +116,10 @@ export const queryOrchestratorLlmMistral = new ChatMistralAI({
 
 }).withStructuredOutput(queryOrchestratorLlmSchema, {
   name: "orchestrator_output",
+  includeRaw:true
 })
 
-// ----------------------------------------
-// Query Generator
-// ----------------------------------------
+
 const queryGeneratorLlmSchema = z.object({
   query: z
     .string()

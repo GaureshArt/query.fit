@@ -16,6 +16,7 @@ import { DynamicTable } from "./dynamic-table";
 import { Spinner } from "@/components/ui/spinner";
 import GenerativeUi from "@/utils/agent/ui";
 import QueryApproveInterrupt from "./query-approve-interrupt";
+import { CodeBlock, CodeBlockCopyButton} from "@/components/ai-elements/code-block";
 interface IConversationInterfaceProps {
   state: GraphState;
   isLoading: boolean;
@@ -23,6 +24,7 @@ interface IConversationInterfaceProps {
   submit: () => void;
   disapproveSubmit: () => void;
   name: string;
+  editQuerySubmit:(newSql:string)=>void;
 }
 export default function ConversationInterface({
   state,
@@ -31,6 +33,7 @@ export default function ConversationInterface({
   name,
   submit,
   disapproveSubmit,
+  editQuerySubmit
 }: IConversationInterfaceProps) {
   return (
     <>
@@ -65,7 +68,7 @@ export default function ConversationInterface({
                             {typeof message.content === "string"
                               ? message.content
                               : message.content.map((part) =>
-                                  part.type === "text" ? part.text : ""
+                                  part.type === "text" ? part.text :""
                                 )}
                           </Response>
                         ) : (
@@ -106,17 +109,37 @@ export default function ConversationInterface({
                 />
               )}
 
-              {state.queryResult && (
-                <Message from="queryresult" className=" ">
-                  <MessageContent className=" w-full">
-                    <p className="font-semibold ">Query Result:</p>
+            {state.queryResult && state.sqlQuery && (
+  <Message from="queryresult" className="border rounded-md border-zinc-200">
+    <MessageContent className="w-full">
+      <div className={cn("border border-zinc-800 rounded-sm px-2 py-1 min-h-20")}>
+        
+        
+        <CodeBlock
+          code={state.sqlQuery}
+          language="sql"
+          className="border-none"
+          onEdit={(newSql) => {
+           editQuerySubmit(newSql)
+  
+          }}
+        >
+          <CodeBlockCopyButton
+            onCopy={() => console.log("Copied code to clipboard")}
+            onError={() => console.error("Failed to copy code to clipboard")}
+          />
+        </CodeBlock>
 
-                    <div className="w-full  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                      <DynamicTable data={state.queryResult} />
-                    </div>
-                  </MessageContent>
-                </Message>
-              )}
+      </div>
+      <p className="font-semibold">Query Result:</p>
+      <div className="w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {
+          state.queryResult && state.queryResult instanceof Array && <DynamicTable data={state.queryResult} />
+        }
+      </div>
+    </MessageContent>
+  </Message>
+)}
 
               {state.queryPlan && (
                 <Message from="assistant" className=" overflow-auto">
