@@ -22,9 +22,7 @@ const QueryFitAgent = new StateGraph(graphState)
   .addNode("validator", validator)
   .addNode("generalChat", generalChat)
   .addNode("generateChart", generateChartData)
-  .addNode("queryClarifier", queryClarifier, {
-    ends: ["generateQuery"],
-  })
+  .addNode("queryClarifier", queryClarifier)
   .addNode("generateSchema", generateSchema)
   .addNode("generateQuery", generateQuery)
   .addNode("executeQuery", executeQuery)
@@ -48,7 +46,7 @@ const QueryFitAgent = new StateGraph(graphState)
       queryPlanner: "queryPlanner",
       generalChat: "generalChat",
       validator: "validator",
-      orchestrator: "__end__", 
+      orchestrator: "orchestrator", 
       __end__: "__end__",
     }
   )

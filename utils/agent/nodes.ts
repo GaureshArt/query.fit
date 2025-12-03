@@ -107,7 +107,6 @@ export const queryClarifier = withFaultTolerance(async (state: GraphState) => {
   ]);
   return {
     messages: [new AIMessage({content:res.message,response_metadata: {
-          
           tags: ["final_response"],
         },})],
     routeDecision:ROUTES.END
