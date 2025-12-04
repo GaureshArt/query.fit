@@ -33,6 +33,7 @@ import {
 } from "@langchain/langgraph";
 import { TOOL_REGISTRY } from "./toolsInfo";
 import { withFaultTolerance } from "./wrapper";
+import { validateAndFixQuery } from "./utils";
 export const generateSchema = withFaultTolerance(async (state: GraphState) => {
   if (state.schema) {
     return {
@@ -202,24 +203,19 @@ export const validator = withFaultTolerance(async (state: GraphState) => {
   if (!state.sqlQuery) {
     throw new Error("Cannot validate. SQL query is missing.");
   }
-
-  const prompt = await VALIDATOR_PROMPT.format({
-    sqlQuery: state.sqlQuery,
-    schema: state.schema,
-    userQuery: state.messages.at(-1)?.content,
-  });
-
-  const res = await validatorLlm.invoke([
-    new SystemMessage(prompt),
-    ...state.messages,
-  ]);
+  const safeQuery = validateAndFixQuery(state.sqlQuery);
 
   return {
-    feedback: res.feedback,
-    routeDecision: res.routeDecision,
+    sqlQuery:safeQuery,
+    feedback: "Query is safe. Proceed to execute next node.",
+    routeDecision: ROUTES.ORCHESTRATOR,
+    validatorScore:9
   };
 });
-
+interface rawMessage {
+  text:string;
+  type:string
+}
 export const orchestrator =withFaultTolerance( async (state: GraphState) => {
   const queryPlan = state.queryPlan;
   const currentStepIndex = state.currentStepIndex;
@@ -243,12 +239,9 @@ export const orchestrator =withFaultTolerance( async (state: GraphState) => {
 
   console.log("This is The message: ",(res.raw as AIMessage).content instanceof Array)
   
-  const custom = JSON.parse(JSON.stringify((res.raw as AIMessage).content))
-  console.log("Custome: ",custom)
-  if((res.raw as AIMessage).content instanceof Array){
-    console.log("THis is array is true output",(res.raw as AIMessage).content[0])
-  }
-  if(res.parsed){
+  
+
+  if(!((res.raw as AIMessage).content instanceof Array) && res.parsed){
 
     return {
       feedback: res.parsed.feedback,
@@ -258,6 +251,8 @@ export const orchestrator =withFaultTolerance( async (state: GraphState) => {
       routeDecision: res.parsed.routeDecision,
     };
   }
+  const custom = JSON.parse(((res.raw as AIMessage).content[0] as rawMessage).text) 
+  console.log("this is routeDecision:",custom.routeDecision)
     return {
       feedback: custom.feedback,
       needsReplanning: custom.needsReplanning,

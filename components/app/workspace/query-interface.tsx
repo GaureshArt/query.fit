@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import * as z from "zod";
 import { useStream } from "@langchain/langgraph-sdk/react";
-import { GraphState, ROUTES } from "@/utils/agent/state";
+import { GraphState } from "@/utils/agent/state";
 import { HumanMessage } from "@langchain/core/messages";
 import { useSearchParams } from "next/navigation";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -13,6 +13,7 @@ import { toast, Toaster } from "sonner";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
+  
   const sessionId = searchParams.get("session-id");
   const { name: userName } = useUserInfo();
   const thread = useStream<GraphState, { InterruptType: {id:string,value:string} }>({
@@ -59,6 +60,7 @@ export default function QueryInterface() {
             isLoading={thread.isLoading}
             interrupt={thread.interrupt}
             name={userName}
+            
             submit={() => {
               thread.submit(undefined, {
                 command: { resume: { shouldContinue: true } },
