@@ -25,30 +25,42 @@ import { cn } from "@/lib/utils";
 import { DATABASE_TYPES } from "@/constants/workspace-section";
 import { Lock } from "lucide-react";
 import LockSvg from "@/public/app-svgs/lock-svg";
+import { useMutation } from "@tanstack/react-query";
+import { liveDbConnectSchema } from "@/types/livedbconnect.types";
+import { useRouter } from "next/navigation";
 
-export const formSchema = z.object({
-  databaseType: z.enum(["postgresql", "supabase", "mysql", "neon"], {
-    message: "Please select a database type.",
-  }),
-  connectionString: z
-    .string()
-    .min(1, "Connection string is required")
-    .refine((val) => val.includes("://"), {
-      message: "Must be a valid connection string (e.g., postgresql://...)",
-    }),
-});
 
 export default function LiveDbConnectInterface() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+const router = useRouter()
+  const form = useForm<z.infer<typeof liveDbConnectSchema>>({
+    resolver: zodResolver(liveDbConnectSchema),
     defaultValues: {
       connectionString: "",
       databaseType: "postgresql",
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const mutate = useMutation({
+    mutationKey:["live-database-connection"],
+    mutationFn:async (liveDbData:z.infer<typeof liveDbConnectSchema>)=>{
+        const res = await fetch(`/api/db`,{
+          method:"POST",
+          body:JSON.stringify(liveDbData),
+          headers:{"Content-Type":"application/json"}
+        });
+        const data = await res.json()
+        console.log("responese: ",data)
+        return data;
+    },
+    onSuccess:(data)=>{
+      router.push(`/workspace/query?session-id=${data.dbId}`)
+      console.log("heyyyyy success");
+    }
+    
+  })
+  const onSubmit = (data: z.infer<typeof liveDbConnectSchema>) => {
     console.log("Submitting:", data);
+    mutate.mutate(data)
   };
 
   return (
@@ -141,14 +153,7 @@ export default function LiveDbConnectInterface() {
                     aria-invalid={fieldState.invalid}
                     className={cn("")}
                   />
-                  <div className="mt-2 flex items-start gap-3 rounded-md bg-amber-50 p-3 text-sm text-amber-900 border border-amber-100">
-                    <LockSvg />
-                    <div className="leading-relaxed">
-                      Credentials are encrypted at rest and{" "}
-                      <strong>automatically cleared</strong> when your session
-                      ends.
-                    </div>
-                  </div>
+                 
                   {fieldState.invalid && (
                     <FieldError
                       errors={[fieldState.error]}
@@ -158,9 +163,48 @@ export default function LiveDbConnectInterface() {
                 </Field>
               )}
             />
+            <Controller
+              name="duration"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mt-4 font-cutive-mono">
+                  <FieldLabel htmlFor="duration">Session Duration</FieldLabel>
+                  <Select
+                    name={field.name}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger
+                      id="duration"
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <SelectValue placeholder="Select Duration" />
+                    </SelectTrigger>
+                    <SelectContent className="font-cutive-mono">
+                      <SelectItem value="4">4 Hours </SelectItem>
+                      <SelectItem value="8">8 Hours </SelectItem>
+                      <SelectItem value="12">12 Hours</SelectItem>
+                      <SelectItem value="24">24 Hours (Max)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                 
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+             <div className="mt-2 flex items-start gap-3 rounded-md bg-amber-50 p-3 text-sm text-amber-900 border border-amber-100">
+                    <LockSvg />
+                    <div className="leading-relaxed">
+                      Credentials are encrypted at rest and{" "}
+                      <strong>automatically cleared</strong> when your duration
+                      ends.
+                    </div>
+                  </div>
           </FieldGroup>
 
-          <Button type="submit" className={cn("mt-4 w-full")}>
+          <Button disabled={mutate.isPending} type="submit" className={cn("mt-4 w-full")}>
             Connect Database
           </Button>
         </form>
