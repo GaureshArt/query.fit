@@ -10,10 +10,11 @@ import { useUserInfo } from "@/lib/user-store";
 import ConversationInterface from "./conversation-interface";
 import PromptInput, { formSchema } from "./prompt-input";
 import { toast, Toaster } from "sonner";
+import { useEffect } from "react";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
-  
+  const {setDbid} = useUserInfo()
   const sessionId = searchParams.get("session-id");
   const { name: userName } = useUserInfo();
   const thread = useStream<GraphState, { InterruptType: {id:string,value:string} }>({
@@ -38,6 +39,10 @@ export default function QueryInterface() {
       dbId: sessionId,
     });
   };
+  useEffect(() => {
+    setDbid(sessionId)
+  }, [sessionId])
+  
   return (
     <>
       <Toaster/>
@@ -90,7 +95,7 @@ export default function QueryInterface() {
             isSidebarOpen ? "w-4/5" : "w-full"
           )}
         >
-          <PromptInput isSidebarOpen={isSidebarOpen} submit={onSubmit} />
+          <PromptInput isSidebarOpen={isSidebarOpen} submit={onSubmit} stop={thread.stop} isLoading={thread.isLoading} />
         </div>
       </div>
     </>

@@ -3,6 +3,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import PromptSendSvg from "@/public/app-svgs/prompt-send-svg";
+import StopBtnSvg from "@/public/app-svgs/stop-btn-svg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -10,12 +11,14 @@ import z from "zod";
 interface IPromptInput {
   isSidebarOpen: boolean;
   submit: (data: { query: string }) => void;
+  isLoading:boolean;
+  stop:()=>void;
 }
 
 export const formSchema = z.object({
   query: z.string().min(3, "Please enter proper query. At least 3 characters"),
 });
-export default function PromptInput({ isSidebarOpen, submit }: IPromptInput) {
+export default function PromptInput({ isSidebarOpen, isLoading,stop,submit }: IPromptInput) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,13 +70,24 @@ export default function PromptInput({ isSidebarOpen, submit }: IPromptInput) {
             </Field>
           )}
         />
-
+{
+isLoading ?
+        
         <Button
-          type="submit"
-          className="absolute bottom-3 right-3 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"
+        
+        className="absolute bottom-3 right-3 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"
+        onClick={stop}
+        >
+          <StopBtnSvg/>
+        </Button>:
+        <Button
+        disabled={isLoading}
+        type="submit"
+        className="absolute bottom-3 right-3 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"
         >
           <PromptSendSvg />
         </Button>
+        }
       </form>
     </div>
   );
