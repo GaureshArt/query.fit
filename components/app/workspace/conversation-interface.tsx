@@ -133,13 +133,13 @@ export default function ConversationInterface({
                       {showQuery ? (
                         <div
                           className={cn(
-                            "border border-zinc-800 rounded-sm px-2 py-1 min-h-20"
+                            "border border-zinc-800 rounded-sm px-2 py-1 min-h-20 text-wrap w-3/4 bg-red-300"
                           )}
                         >
                           <CodeBlock
                             code={state.sqlQuery}
                             language="sql"
-                            className="border-none"
+                            className=" text-wrap "
                             onEdit={(newSql) => {
                               editQuerySubmit(newSql);
                             }}

@@ -176,6 +176,7 @@ export function DynamicPieChart({ chartData, config }: DynamicChartProps) {
             nameKey={config.xAxisKey}
             cx="50%"
             cy="50%"
+            color="red"
             outerRadius="80%"
           >
             <LabelList
