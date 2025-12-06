@@ -14,12 +14,11 @@ import {
 } from "react";
 import { type BundledLanguage, codeToHtml, type ShikiTransformer } from "shiki";
 
-// 1. Add onEdit to props
 type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   code: string;
   language: BundledLanguage;
   showLineNumbers?: boolean;
-  onEdit?: (newCode: string) => void; // New callback
+  onEdit?: (newCode: string) => void;
 };
 
 type CodeBlockContextType = {
@@ -80,24 +79,21 @@ export const CodeBlock = ({
   showLineNumbers = false,
   className,
   children,
-  onEdit, // Destructure new prop
+  onEdit,
   ...props
 }: CodeBlockProps) => {
   const [html, setHtml] = useState<string>("");
   const [darkHtml, setDarkHtml] = useState<string>("");
   const mounted = useRef(false);
 
-  // 2. Add Edit State
   const [isEditing, setIsEditing] = useState(false);
   const [editableCode, setEditableCode] = useState(code);
 
-  // Reset editable code if the prop changes (e.g. AI regenerates)
   useEffect(() => {
     setEditableCode(code);
   }, [code]);
 
   useEffect(() => {
-    // Don't re-highlight if we are just editing text locally
     if (isEditing) return;
 
     highlightCode(code, language, showLineNumbers).then(([light, dark]) => {
@@ -121,7 +117,7 @@ export const CodeBlock = ({
   };
 
   const handleCancel = () => {
-    setEditableCode(code); // Revert to original
+    setEditableCode(code);
     setIsEditing(false);
   };
 
@@ -129,61 +125,74 @@ export const CodeBlock = ({
     <CodeBlockContext.Provider value={{ code }}>
       <div
         className={cn(
-          "group relative w-full overflow-hidden rounded-md border bg-background text-foreground",
+          // REMOVED: overflow-hidden (it can sometimes hide dropdowns/popovers if you add them later)
+          // ADDED: h-fit to ensure container grows
+          "group relative w-full rounded-md border bg-background text-foreground h-fit",
           className
         )}
         {...props}
       >
         <div className="relative">
-            {/* 3. Conditional Rendering for Edit Mode */}
-            {isEditing ? (
-              <textarea
-                value={editableCode}
-                onChange={(e) => setEditableCode(e.target.value)}
-                spellCheck={false}
-                className="w-full min-h-[100px] p-4 font-mono text-sm bg-background text-foreground resize-y focus:outline-none"
-                style={{ lineHeight: '1.5' }} // Match code block line height usually
-              />
-            ) : (
+          {isEditing ? (
+            <textarea
+              value={editableCode}
+              onChange={(e) => setEditableCode(e.target.value)}
+              spellCheck={false}
+              className="w-full min-h-[100px] p-4 font-mono text-sm bg-background text-foreground resize-y focus:outline-none whitespace-pre-wrap"
+              style={{ lineHeight: "1.5" }}
+            />
+          ) : (
             <>
+              {/* FIX APPLIED HERE:
+                 1. [&>pre]:whitespace-pre-wrap  -> Forces text to wrap to the next line
+                 2. [&>pre]:break-all            -> Forces long strings (like UUIDs/Hashes) to break mid-word
+                 3. [&>pre]:overflow-x-hidden    -> Prevents horizontal scrollbar from appearing
+              */}
               <div
-                className="overflow-hidden dark:hidden [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:p-4 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+                className="[&>pre]:m-0 [&>pre]:bg-background! [&>pre]:p-4 [&>pre]:text-foreground! [&>pre]:text-sm [&>pre]:whitespace-pre-wrap [&>pre]:break-all [&>pre]:overflow-x-hidden [&_code]:font-mono [&_code]:text-sm"
                 dangerouslySetInnerHTML={{ __html: html }}
               />
               <div
-                className="hidden overflow-hidden dark:block [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:p-4 [&>pre]:text-foreground! [&>pre]:text-sm [&_code]:font-mono [&_code]:text-sm"
+                className="hidden dark:block [&>pre]:m-0 [&>pre]:bg-background! [&>pre]:p-4 [&>pre]:text-foreground! [&>pre]:text-sm [&>pre]:whitespace-pre-wrap [&>pre]:break-all [&>pre]:overflow-x-hidden [&_code]:font-mono [&_code]:text-sm"
                 dangerouslySetInnerHTML={{ __html: darkHtml }}
               />
             </>
           )}
 
-          {/* 4. Action Buttons Area */}
-          <div className="absolute top-2 right-2 flex items-center gap-2">
-            
-            {/* Edit Controls */}
+          <div className="absolute top-2 right-2 flex items-center gap-2 bg-background/50 backdrop-blur-sm p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
             {isEditing ? (
-                <>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-green-500 hover:text-green-600 hover:bg-green-100" onClick={handleSave}>
-                        <CheckIcon size={14} />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-100" onClick={handleCancel}>
-                        <XIcon size={14} />
-                    </Button>
-                </>
+              <>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6 text-green-500 hover:text-green-600 hover:bg-green-100"
+                  onClick={handleSave}
+                >
+                  <CheckIcon size={14} />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-100"
+                  onClick={handleCancel}
+                >
+                  <XIcon size={14} />
+                </Button>
+              </>
             ) : (
-                <>
-                  {children}
-                  {onEdit && (
-                     <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className="shrink-0"
-                        onClick={() => setIsEditing(true)}
-                     >
-                        <PencilIcon size={14} />
-                     </Button>
-                  )}
-                </>
+              <>
+                {children}
+                {onEdit && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="shrink-0 h-6 w-6"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <PencilIcon size={14} />
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -229,7 +238,7 @@ export const CodeBlockCopyButton = ({
 
   return (
     <Button
-      className={cn("shrink-0", className)}
+      className={cn("shrink-0 h-6 w-6", className)}
       onClick={copyToClipboard}
       size="icon"
       variant="ghost"

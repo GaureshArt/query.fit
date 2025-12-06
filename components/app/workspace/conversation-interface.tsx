@@ -24,6 +24,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CrossIcon } from "lucide-react";
 import BackBtnSvg from "@/public/app-svgs/back-btn-svg";
+import { AIMessage, AIMessageChunk } from "@langchain/core/messages";
 interface IConversationInterfaceProps {
   state: GraphState;
   isLoading: boolean;
@@ -59,12 +60,8 @@ export default function ConversationInterface({
             <>
               {state.messages &&
                 state.messages.map((message, index) => {
-                  const metaData = message.response_metadata as {
-                    tags: string[];
-                  };
-                  return (metaData.tags?.length &&
-                    metaData.tags.includes("final_response")) ||
-                    message.type === "human" ? (
+                
+                  return (
                     <Message
                       className=" mb-2"
                       from={message.type === "human" ? "user" : "assistant"}
@@ -72,6 +69,7 @@ export default function ConversationInterface({
                     >
                       <MessageContent className={cn("")}>
                         {message.type === "ai" || message.type === "human" ? (
+                        <div>
                           <Response
                             className={cn(
                               message.type === "human" ? "bg-black" : ""
@@ -82,15 +80,22 @@ export default function ConversationInterface({
                               : message.content.map((part) =>
                                   part.type === "text" ? part.text : ""
                                 )}
+                                
                           </Response>
+                          <div>
+                            
+                                {
+                                  message.type==="ai" &&
+                                  ((message) as AIMessageChunk).usage_metadata?.total_tokens 
+                                }
+                          </div>
+                          </div>
                         ) : (
                           ""
                         )}
                       </MessageContent>
                     </Message>
-                  ) : (
-                    ""
-                  );
+                  ) 
                 })}
 
               {isLoading ? (
@@ -133,7 +138,7 @@ export default function ConversationInterface({
                       {showQuery ? (
                         <div
                           className={cn(
-                            "border border-zinc-800 rounded-sm px-2 py-1 min-h-20 text-wrap w-3/4 bg-red-300"
+                            "border border-zinc-800 rounded-sm px-2 py-1 min-h-20 text-wrap w-3/4 "
                           )}
                         >
                           <CodeBlock

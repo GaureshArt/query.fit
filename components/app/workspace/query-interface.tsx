@@ -24,6 +24,7 @@ export default function QueryInterface() {
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
+    
   });
 
   const { open: isSidebarOpen } = useSidebar();
@@ -39,8 +40,7 @@ export default function QueryInterface() {
     }
     thread.submit({
       messages: [new HumanMessage(data.query)],
-      dbId: sessionId,
-      dbType:dbType
+      dbId: sessionId
     });
   };
   useEffect(() => {

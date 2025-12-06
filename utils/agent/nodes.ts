@@ -55,7 +55,7 @@ export const generateSchema = withFaultTolerance(async (state: GraphState) => {
       throw new Error("Live Database connection not found.");
     }
 
-    const type = dbType?.toLowerCase() || "postgresql";
+    const type = liveCreds.dbType?.toLowerCase() || "postgresql";
     let schemaString = "";
 
     if (["postgresql", "postgres", "supabase", "neon"].includes(type)) {
@@ -384,10 +384,7 @@ export const orchestrator = withFaultTolerance(async (state: GraphState) => {
     { recursionLimit: 10 }
   );
 
-  console.log(
-    "This is The message: ",
-    (res.raw as AIMessage).content instanceof Array
-  );
+ 
 
   if (!((res.raw as AIMessage).content instanceof Array) && res.parsed) {
     return {
@@ -462,13 +459,7 @@ export const generalChat = withFaultTolerance(async (state: GraphState) => {
   return {
     routeDecision: ROUTES.END,
     messages: [
-      new AIMessage({
-        content: res.content,
-        response_metadata: {
-          ...res.response_metadata,
-          tags: ["final_response"],
-        },
-      }),
+      res
     ],
     feedback: "",
     queryPlan: undefined,
