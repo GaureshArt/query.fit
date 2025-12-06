@@ -32,8 +32,6 @@ export const getUserData = async () => {
     const { data, error } = await supabase.auth.getUser();
     if (data.user) {
       return data.user;
-
-      
     } else {
       return redirect("/");
     }
@@ -41,4 +39,3 @@ export const getUserData = async () => {
     throw err;
   }
 };
-

@@ -1,9 +1,8 @@
 import * as z from "zod";
 import { BaseMessage } from "@langchain/core/messages";
 import { registry } from "@langchain/langgraph/zod";
-import {addMessages} from "@langchain/langgraph"
+import { addMessages } from "@langchain/langgraph";
 import { chartConfigSchema, queryPlannerLlmSchema } from "./models";
-
 
 export const ROUTES = {
   GENERATE_SCHEMA: "generateSchema",
@@ -19,16 +18,15 @@ export const ROUTES = {
   END: "__end__",
 } as const;
 
-
-
 export const graphState = z.object({
   messages: z.array(z.custom<BaseMessage>()).register(registry, {
     reducer: {
       fn: addMessages,
     },
     default: () => [] as BaseMessage[],
-  }),   
+  }),
   dbId: z.string(),
+  dbType: z.enum(["mysql", "postgresql", "supabase", "neon"]),
   schema: z.string().optional(),
   sqlQuery: z.string().optional(),
   queryResult: z.any().optional(),
@@ -46,7 +44,7 @@ export const graphState = z.object({
       "generateChart",
       "validator",
       "orchestrator",
-      "__end__"
+      "__end__",
     ])
     .optional(),
   lastError: z.string().optional(),
@@ -55,10 +53,10 @@ export const graphState = z.object({
   chartSpec: z.any().optional(),
   answeredQuery: z.boolean().optional(),
   feedback: z.string().optional(),
-  validatorScore:z.number().optional(),
-  ui:z.object({
-    config:chartConfigSchema,
-    data:z.any()
+  validatorScore: z.number().optional(),
+  ui: z.object({
+    config: chartConfigSchema,
+    data: z.any(),
   }),
   queryPlan: z.custom<z.infer<typeof queryPlannerLlmSchema>>().optional(),
 });

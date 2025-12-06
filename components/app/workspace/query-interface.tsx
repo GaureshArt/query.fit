@@ -14,10 +14,13 @@ import { useEffect } from "react";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
-  const {setDbid} = useUserInfo()
+  const { setDbid,dbType } = useUserInfo();
   const sessionId = searchParams.get("session-id");
   const { name: userName } = useUserInfo();
-  const thread = useStream<GraphState, { InterruptType: {id:string,value:string} }>({
+  const thread = useStream<
+    GraphState,
+    { InterruptType: { id: string; value: string } }
+  >({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
@@ -30,22 +33,23 @@ export default function QueryInterface() {
   }
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    if(!data.query.trim()){
-      toast.error("Enter valid query")
+    if (!data.query.trim()) {
+      toast.error("Enter valid query");
       return;
     }
     thread.submit({
       messages: [new HumanMessage(data.query)],
       dbId: sessionId,
+      dbType:dbType
     });
   };
   useEffect(() => {
-    setDbid(sessionId)
-  }, [sessionId])
-  
+    setDbid(sessionId);
+  }, [sessionId]);
+
   return (
     <>
-      <Toaster/>
+      <Toaster />
       <div
         className={cn(
           "flex flex-col justify-center w-full  md:w-4/5 border-zinc-300  ",
@@ -65,7 +69,6 @@ export default function QueryInterface() {
             isLoading={thread.isLoading}
             interrupt={thread.interrupt}
             name={userName}
-            
             submit={() => {
               thread.submit(undefined, {
                 command: { resume: { shouldContinue: true } },
@@ -76,17 +79,19 @@ export default function QueryInterface() {
                 command: { resume: { shouldContinue: false } },
               });
             }}
-            editQuerySubmit={(sqlQuery:string)=>{
+            editQuerySubmit={(sqlQuery: string) => {
               thread.submit({
-                messages:[new HumanMessage(`Execute this query so dont go to the generate node go directly execute node . sql query: ${sqlQuery}`)],
+                messages: [
+                  new HumanMessage(
+                    `Execute this query so dont go to the generate node go directly execute node . sql query: ${sqlQuery}`
+                  ),
+                ],
                 sqlQuery,
-                
-                feedback:'Go directly to the execute query node.'
-              })
+
+                feedback: "Go directly to the execute query node.",
+              });
             }}
           />
-
-         
         </div>
 
         <div
@@ -95,7 +100,12 @@ export default function QueryInterface() {
             isSidebarOpen ? "w-4/5" : "w-full"
           )}
         >
-          <PromptInput isSidebarOpen={isSidebarOpen} submit={onSubmit} stop={thread.stop} isLoading={thread.isLoading} />
+          <PromptInput
+            isSidebarOpen={isSidebarOpen}
+            submit={onSubmit}
+            stop={thread.stop}
+            isLoading={thread.isLoading}
+          />
         </div>
       </div>
     </>

@@ -51,7 +51,7 @@ export function DynamicBarChart({ chartData, config }: DynamicChartProps) {
   }, [config]);
 
   return (
-    <div className="w-full max-h-[400px]">
+    <div className="w-full max-h-[400px] overflow-scroll px-4 py-2">
       <ChartContainer config={chartConfig} className="min-h-[100px] w-full">
         <BarChart accessibilityLayer data={chartData}>
           <CartesianGrid vertical={false} />

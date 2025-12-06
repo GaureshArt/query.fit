@@ -23,15 +23,17 @@ import {
 } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import { DATABASE_TYPES } from "@/constants/workspace-section";
-import { Lock } from "lucide-react";
+import { Lock, Variable } from "lucide-react";
 import LockSvg from "@/public/app-svgs/lock-svg";
 import { useMutation } from "@tanstack/react-query";
 import { liveDbConnectSchema } from "@/types/livedbconnect.types";
 import { useRouter } from "next/navigation";
+import { useUserInfo } from "@/lib/user-store";
 
 
 export default function LiveDbConnectInterface() {
 const router = useRouter()
+const {setDbType} = useUserInfo()
   const form = useForm<z.infer<typeof liveDbConnectSchema>>({
     resolver: zodResolver(liveDbConnectSchema),
     defaultValues: {
@@ -52,9 +54,9 @@ const router = useRouter()
         console.log("responese: ",data)
         return data;
     },
-    onSuccess:(data)=>{
-      router.push(`/workspace/query?session-id=${data.dbId}`)
-      console.log("heyyyyy success");
+    onSuccess:(data,variable)=>{
+      setDbType(variable.databaseType);
+      router.push(`/workspace/query?session-id=live_${data.dbId}`)
     }
     
   })
