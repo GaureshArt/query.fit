@@ -1,5 +1,7 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatDeepSeek } from "@langchain/deepseek";
+import { ChatMoonshot } from "@langchain/community/chat_models/moonshot";
+
 import { ChatMistralAI } from "@langchain/mistralai";
 import { ChatOpenAI } from "@langchain/openai";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
@@ -12,7 +14,7 @@ import {
   validatorLlmSchema,
 } from "./model-schema";
 
-export type ModelProvider = "gemini" | "deepseek" | "mistral" | "openai";
+export type ModelProvider = "gemini" | "deepseek" | "mistral" | "openai" | "moonshot";
 
 interface ModelConfig {
   provider?: ModelProvider;
@@ -52,9 +54,11 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
 
     case "mistral":
       return new ChatMistralAI({
-        model: config.modelName || "mistral-large-latest",
+        model: "mistral-large-2512",
         apiKey: process.env.MISTRAL_API_KEY,
-        temperature,
+        temperature:0,
+        
+        
       });
 
     case "openai":
@@ -67,6 +71,12 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
           baseURL: "https://openrouter.ai/api/v1",
         },
       });
+      case "moonshot":
+          return new ChatMoonshot({
+            apiKey:process.env.MOONSHOT_API_KEY,
+            model:"moonshotai/kimi-k2:free",
+            
+          })
 
     default:
       throw new Error(`❌ Unsupported Provider: ${provider}`);

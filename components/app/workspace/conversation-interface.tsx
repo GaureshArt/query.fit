@@ -1,3 +1,4 @@
+"use client"
 import {
   Conversation,
   ConversationContent,
@@ -72,27 +73,24 @@ export default function ConversationInterface({
                       key={index}
                     >
                       <MessageContent className={cn("")}>
-                        {(message.type === "ai" || message.type === "human") &&
-                        message.additional_kwargs.node === "general_chat" ? (
+                        {/* {(message.type === "ai" || message.type === "human")( */}
                           <div>
-                            <Response
+                            {/* <Response
                               className={cn(
                                 message.type === "human" ? "bg-black" : ""
                               )}
-                            >
+                            > */}
                               {typeof message.content === "string"
                                 ? message.content
                                 : message.content.map((m) => m.text).join(" ")}
-                            </Response>
+                            {/* </Response> */}
                             <div>
                               {message.type === "ai" &&
                                 (message as AIMessageChunk).usage_metadata
                                   ?.total_tokens}
                             </div>
                           </div>
-                        ) : (
-                          ""
-                        )}
+                        {/* ) } */}
                       </MessageContent>
                     </Message>
                   );
