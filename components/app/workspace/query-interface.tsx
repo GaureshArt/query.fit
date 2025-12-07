@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import * as z from "zod";
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { GraphState } from "@/utils/agent/state";
-import { HumanMessage } from "@langchain/core/messages";
+import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { useSearchParams } from "next/navigation";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useUserInfo } from "@/lib/user-store";
@@ -39,7 +39,12 @@ export default function QueryInterface() {
       return;
     }
     thread.submit({
-      messages: [new HumanMessage(data.query)],
+      messages: [new HumanMessage({
+        content:data.query,
+        additional_kwargs:{
+          node:"general_chat"
+        }
+      })],
       dbId: sessionId
     });
   };
@@ -65,6 +70,7 @@ export default function QueryInterface() {
           )}
         >
           <ConversationInterface
+            messages={thread.messages as BaseMessage[]}
             state={thread.values}
             isLoading={thread.isLoading}
             interrupt={thread.interrupt}

@@ -6,7 +6,7 @@ import {
 } from "@/components/ai-elements/conversation";
 import { cn } from "@/lib/utils";
 import { GraphState } from "@/utils/agent/state";
-import { Interrupt } from "@langchain/langgraph";
+import { Interrupt, Messages } from "@langchain/langgraph";
 import EmptyStateChatInterface from "./empty-state-chat-interface";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
@@ -22,11 +22,15 @@ import {
 } from "@/components/ai-elements/code-block";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CrossIcon } from "lucide-react";
 import BackBtnSvg from "@/public/app-svgs/back-btn-svg";
-import { AIMessage, AIMessageChunk } from "@langchain/core/messages";
+import {
+  AIMessageChunk,
+  BaseMessage,
+  BaseMessageChunk,
+} from "@langchain/core/messages";
 interface IConversationInterfaceProps {
   state: GraphState;
+  messages: BaseMessage[];
   isLoading: boolean;
   interrupt: Interrupt<{ id: string; value: string }> | undefined;
   submit: () => void;
@@ -40,6 +44,7 @@ export default function ConversationInterface({
   interrupt,
   name,
   submit,
+  messages,
   disapproveSubmit,
   editQuerySubmit,
 }: IConversationInterfaceProps) {
@@ -52,15 +57,14 @@ export default function ConversationInterface({
     <>
       <Conversation>
         <ConversationContent className="w-auto max-w-full">
-          {!state.messages ? (
+          {!messages.length ? (
             <ConversationEmptyState
               children={<EmptyStateChatInterface username={name} />}
             />
           ) : (
             <>
-              {state.messages &&
-                state.messages.map((message, index) => {
-                
+              {messages &&
+                messages.map((message, index) => {
                   return (
                     <Message
                       className=" mb-2"
@@ -68,34 +72,30 @@ export default function ConversationInterface({
                       key={index}
                     >
                       <MessageContent className={cn("")}>
-                        {message.type === "ai" || message.type === "human" ? (
-                        <div>
-                          <Response
-                            className={cn(
-                              message.type === "human" ? "bg-black" : ""
-                            )}
-                          >
-                            {typeof message.content === "string"
-                              ? message.content
-                              : message.content.map((part) =>
-                                  part.type === "text" ? part.text : ""
-                                )}
-                                
-                          </Response>
+                        {(message.type === "ai" || message.type === "human") &&
+                        message.additional_kwargs.node === "general_chat" ? (
                           <div>
-                            
-                                {
-                                  message.type==="ai" &&
-                                  ((message) as AIMessageChunk).usage_metadata?.total_tokens 
-                                }
-                          </div>
+                            <Response
+                              className={cn(
+                                message.type === "human" ? "bg-black" : ""
+                              )}
+                            >
+                              {typeof message.content === "string"
+                                ? message.content
+                                : message.content.map((m) => m.text).join(" ")}
+                            </Response>
+                            <div>
+                              {message.type === "ai" &&
+                                (message as AIMessageChunk).usage_metadata
+                                  ?.total_tokens}
+                            </div>
                           </div>
                         ) : (
                           ""
                         )}
                       </MessageContent>
                     </Message>
-                  ) 
+                  );
                 })}
 
               {isLoading ? (

@@ -123,3 +123,4 @@ export function DynamicTable({ data, className }: DynamicTableProps) {
     </div>
   );
 }
+

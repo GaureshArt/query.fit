@@ -8,9 +8,10 @@ import {
   queryGeneratorLlm,
   queryOrchestratorLlm,
   queryPlannerLlm,
+  
 } from "./models";
 import { GraphState, ROUTES } from "./state";
-import { AIMessage, SystemMessage } from "@langchain/core/messages";
+import { AIMessage, AIMessageChunk, SystemMessage } from "@langchain/core/messages";
 import path from "path";
 import os from "os";
 import {
@@ -113,7 +114,7 @@ export const generateSchema = withFaultTolerance(async (state: GraphState) => {
     return {
       dbType: liveCreds.dbType,
       schema: schemaString,
-      feedback: "Live Schema generated successfully.",
+      feedback: "Live Schema generated successfully. Go to the next step",
       routeDecision: ROUTES.ORCHESTRATOR,
     };
   }
@@ -427,16 +428,15 @@ export const summarizeOutput = withFaultTolerance(async (state: GraphState) => {
     new SystemMessage(prompt),
     ...state.messages,
   ]);
-
+console.log("res: ",res.content,"\n")
   return {
-    messages: [
-      new AIMessage({
-        content: res.content,
-        response_metadata: {
-          ...res.response_metadata,
-          tags: ["final_response"],
-        },
-      }),
+   messages: [
+      new AIMessageChunk({
+        ...res,
+        additional_kwargs:{
+          node:"general_chat"
+        }
+      })
     ],
     routeDecision: ROUTES.END,
     feedback: "",
@@ -455,11 +455,16 @@ export const generalChat = withFaultTolerance(async (state: GraphState) => {
     new SystemMessage(prompt),
     ...state.messages,
   ]);
-
+console.log("res: ",res.content,"\n")
   return {
     routeDecision: ROUTES.END,
     messages: [
-      res
+      new AIMessageChunk({
+        ...res,
+        additional_kwargs:{
+          node:"general_chat"
+        }
+      })
     ],
     feedback: "",
     queryPlan: undefined,
