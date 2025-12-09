@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Conversation,
   ConversationContent,
@@ -30,6 +30,7 @@ import {
   BaseMessageChunk,
 } from "@langchain/core/messages";
 import ChatBlock from "./chat-block";
+import ChainOfThoughtQueryPlan from "./chain-of-thought-query-plan";
 interface IConversationInterfaceProps {
   state: GraphState;
   messages: BaseMessage[];
@@ -46,13 +47,13 @@ export default function ConversationInterface({
   interrupt,
   name,
   submit,
-  messages,
+
   disapproveSubmit,
   editQuerySubmit,
 }: IConversationInterfaceProps) {
   const [showQuery, setShowQuery] = useState<boolean>(false);
   const ChartComponent = state.ui?.config?.type
-    ? GenerativeUi[state.ui.config.type] 
+    ? GenerativeUi[state.ui.config.type]
     : null;
 
   return (
@@ -65,21 +66,28 @@ export default function ConversationInterface({
             />
           ) : (
             <>
-             <ChatBlock messages={state.messages}/>
-              {isLoading ? (
-                <div className="flex gap-5 items-center ">
-                  <Spinner />
-                  <ShimmeringText
-                    className="inline-block"
-                    text={
-                      state.queryPlan?.steps[state.currentStepIndex]
-                        ?.ui_message ?? "QueryFit is Thinking"
-                    }
-                  />
-                </div>
-              ) : (
-                ""
-              )}
+              <ChatBlock messages={state.messages} />
+              {isLoading?
+                <>
+                  {/* <div className="flex gap-5 items-center ">
+                    <Spinner />
+                    <ShimmeringText
+                      className="inline-block"
+                      text={
+                        state.queryPlan?.steps[state.currentStepIndex]
+                          ?.ui_message ?? "QueryFit is Thinking"
+                      }
+                    />
+                  </div> */}
+                  <div>
+                    <ChainOfThoughtQueryPlan
+                      currentStepIndex={state.currentStepIndex}
+                      isThinking={isLoading}
+                      plan={state.queryPlan}
+                    />
+                  </div>
+                </>:""
+              }
 
               {ChartComponent && (
                 <ChartComponent
@@ -153,16 +161,6 @@ export default function ConversationInterface({
                     </MessageContent>
                   </Message>
                 </>
-              )}
-
-              {state.queryPlan && (
-                <Message from="assistant" className=" overflow-auto">
-                  <MessageContent className=" w-full">
-                    <p className="font-semibold ">Query Result:</p>
-
-                    <Response>{JSON.stringify(state.queryPlan)}</Response>
-                  </MessageContent>
-                </Message>
               )}
             </>
           )}

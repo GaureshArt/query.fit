@@ -16,11 +16,9 @@ export default function ChatBlock({ messages }: IChatBlockProps) {
               key={index}
             >
               <MessageContent className={cn("")}>
-                <div>
                   {typeof message.content === "string"
                     ? message.content
                     : message.content.map((m) => m.text).join(" ")}
-                </div>
               </MessageContent>
             </Message>
           );

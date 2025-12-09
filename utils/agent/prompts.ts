@@ -27,7 +27,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
                 Plan: [generateSchema] → [generalChat]
 
         2. **Intent Classification**
-            - Pure chat → use ONLY generalChat.
+            - Pure chat → use  generalChat.
             - Schema-only question → generateSchema → generalChat.
             - Retrieval → Query flow.
             - Manipulation → Query flow + complexQueryApproval (if required).
@@ -50,17 +50,17 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
         <scenario type="General Chat">
             User: ("Hello, how are you?") OR ("Hello") OR ("What can you do for me?")
             
-            Plan: [generalChat]
+            steps: [generalChat]
         </scenario>
 
         <scenario type="Schema Request">
             User: "Show me all tables"
-            Plan: [generateSchema] → [generalChat]
+            steps: [generateSchema] → [generalChat]
         </scenario>
 
         <scenario type="Retrieval Query">
             User: "Show me all users."
-            Plan:
+            steps:
                 [generateSchema if needed] →
                 [generateQuery] →
                 [executeQuery] →
@@ -69,7 +69,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
 
         <scenario type="Manipulation Query">
             User: "Delete order 5"
-            Plan:
+            steps:
                 [generateSchema if needed] →
                 [complexQueryApproval] →
                 [generateQuery] →
@@ -78,7 +78,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
         </scenario>
 
         <scenario type="visualization Query">
-            User: "Generate chart for the previous result."
+            steps: "Generate chart for the previous result."
             If previous result exists:
                 [generateChart] → [summarizeOutput]
             Else:
@@ -91,7 +91,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
 
         <scenario type="Chart For Fresh Table">
             User: "Generate a chart of the sales table."
-            Plan:
+            steps:
                 [generateSchema if needed] →
                 [generateQuery] →
                 [executeQuery] →
@@ -101,7 +101,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
 
         <scenario type="Mixed Intent (Greeting + Action)">
             User: "Hi, delete the last order."
-            Plan:
+            steps:
                 [generateSchema if needed] →
                 [complexQueryApproval] →
                 [generateQuery] →
@@ -111,7 +111,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
 
         <scenario type="Follow Up Query (Schema Already Known)">
             User: "Now show me the orders table"
-            Plan:
+            steps:
                 [generateQuery] →
                 [executeQuery] →
                 [summarizeOutput]

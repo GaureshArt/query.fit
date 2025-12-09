@@ -35,7 +35,7 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
   switch (provider) {
     case "gemini":
       return new ChatGoogleGenerativeAI({
-        model: config.modelName || "gemini-1.5-flash",
+        model:"gemini-2.5-flash",
         temperature,
         streaming,
         apiKey: process.env.GOOGLE_API_KEY,
