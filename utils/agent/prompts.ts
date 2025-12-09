@@ -48,7 +48,8 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
     <planning_logic>
 
         <scenario type="General Chat">
-            User: "Hello, how are you?"
+            User: ("Hello, how are you?") OR ("Hello") OR ("What can you do for me?")
+            
             Plan: [generalChat]
         </scenario>
 

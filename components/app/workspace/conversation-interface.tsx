@@ -29,6 +29,7 @@ import {
   BaseMessage,
   BaseMessageChunk,
 } from "@langchain/core/messages";
+import ChatBlock from "./chat-block";
 interface IConversationInterfaceProps {
   state: GraphState;
   messages: BaseMessage[];
@@ -64,34 +65,10 @@ export default function ConversationInterface({
             />
           ) : (
             <>
-              {state.messages &&
-                messages.map((message, index) => {
-                  return (
-                    <Message
-                      className=" mb-2"
-                      from={message.type === "human" ? "user" : "assistant"}
-                      key={index}
-                    >
-                      <MessageContent className={cn("")}>
-                          <div>
-                         
-                              {typeof message.content === "string"
-                                ? message.content
-                                : message.content.map((m) => m.text).join(" ")}
-                            <div>
-                              {message.type === "ai" &&
-                                (message as AIMessageChunk).usage_metadata
-                                  ?.total_tokens}
-                            </div>
-                          </div>
-                      </MessageContent>
-                    </Message>
-                  );
-                })}
-
+             <ChatBlock messages={state.messages}/>
               {isLoading ? (
                 <div className="flex gap-5 items-center ">
-                  <Spinner />{" "}
+                  <Spinner />
                   <ShimmeringText
                     className="inline-block"
                     text={
