@@ -2,7 +2,7 @@ import * as z from "zod";
 import { BaseMessage } from "@langchain/core/messages";
 import { registry } from "@langchain/langgraph/zod";
 import { addMessages } from "@langchain/langgraph";
-import { chartConfigSchema, queryPlannerLlmSchema } from "./models";
+import { chartConfigSchema, queryPlannerLlmSchema } from "./model-schema";
 
 export const ROUTES = {
   GENERATE_SCHEMA: "generateSchema",

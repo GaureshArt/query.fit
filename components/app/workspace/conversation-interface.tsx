@@ -15,7 +15,7 @@ import { Response } from "@/components/ai-elements/response";
 import { ShimmeringText } from "@/components/external-ui/shimmering-text";
 import { DynamicTable } from "./dynamic-table";
 import { Spinner } from "@/components/ui/spinner";
-import GenerativeUi from "@/utils/agent/ui";
+import GenerativeUi, { IGenerativeUi } from "@/utils/agent/ui";
 import QueryApproveInterrupt from "./query-approve-interrupt";
 import {
   CodeBlock,
@@ -51,20 +51,20 @@ export default function ConversationInterface({
 }: IConversationInterfaceProps) {
   const [showQuery, setShowQuery] = useState<boolean>(false);
   const ChartComponent = state.ui?.config?.type
-    ? GenerativeUi[state.ui.config.type]
+    ? GenerativeUi[state.ui.config.type] 
     : null;
 
   return (
     <>
       <Conversation>
         <ConversationContent className="w-auto max-w-full">
-          {!messages.length ? (
+          {!state.messages?.length ? (
             <ConversationEmptyState
               children={<EmptyStateChatInterface username={name} />}
             />
           ) : (
             <>
-              {messages &&
+              {state.messages &&
                 messages.map((message, index) => {
                   return (
                     <Message
@@ -73,24 +73,17 @@ export default function ConversationInterface({
                       key={index}
                     >
                       <MessageContent className={cn("")}>
-                        {/* {(message.type === "ai" || message.type === "human")( */}
                           <div>
-                            {/* <Response
-                              className={cn(
-                                message.type === "human" ? "bg-black" : ""
-                              )}
-                            > */}
+                         
                               {typeof message.content === "string"
                                 ? message.content
                                 : message.content.map((m) => m.text).join(" ")}
-                            {/* </Response> */}
                             <div>
                               {message.type === "ai" &&
                                 (message as AIMessageChunk).usage_metadata
                                   ?.total_tokens}
                             </div>
                           </div>
-                        {/* ) } */}
                       </MessageContent>
                     </Message>
                   );

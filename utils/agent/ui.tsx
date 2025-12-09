@@ -191,7 +191,11 @@ export function DynamicPieChart({ chartData, config }: DynamicChartProps) {
     </div>
   );
 }
-
+export type IGenerativeUi = {
+ line: typeof DynamiclineChart,
+  bar: typeof DynamicBarChart,
+  pie: typeof DynamicPieChart,
+}
 export default {
   line: DynamiclineChart,
   bar: DynamicBarChart,
