@@ -20,6 +20,7 @@ export default function ChatBlock({ messages }: IChatBlockProps) {
                     ? message.content
                     : message.content.map((m) => m.text).join(" ")}
               </MessageContent>
+              
             </Message>
           );
         })}
