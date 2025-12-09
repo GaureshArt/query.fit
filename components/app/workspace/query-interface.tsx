@@ -38,6 +38,7 @@ export default function QueryInterface() {
       toast.error("Enter valid query");
       return;
     }
+    
     thread.submit({
       messages: [new HumanMessage({
         content:data.query,

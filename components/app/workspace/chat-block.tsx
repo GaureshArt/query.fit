@@ -1,6 +1,12 @@
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  Message,
+  MessageAction,
+  MessageActions,
+  MessageContent,
+} from "@/components/ai-elements/message";
 import { cn } from "@/lib/utils";
 import { BaseMessage } from "@langchain/core/messages";
+import { CopyIcon, RefreshCcwIcon } from "lucide-react";
 export interface IChatBlockProps {
   messages: BaseMessage[];
 }
@@ -11,16 +17,25 @@ export default function ChatBlock({ messages }: IChatBlockProps) {
         messages.map((message, index) => {
           return (
             <Message
-              className=" mb-2"
+              className={cn(" mb-2 flex flex-col",message.type==="human"?"":"items-start")}
               from={message.type === "human" ? "user" : "assistant"}
               key={index}
             >
               <MessageContent className={cn("")}>
-                  {typeof message.content === "string"
-                    ? message.content
-                    : message.content.map((m) => m.text).join(" ")}
+                {typeof message.content === "string"
+                  ? message.content
+                  : message.content.map((m) => m.text).join(" ")}
               </MessageContent>
-              
+              <MessageActions>
+                <MessageAction
+                  onClick={() =>
+                    navigator.clipboard.writeText(message.content as string)
+                  }
+                  label="Copy"
+                >
+                  <CopyIcon className="size-3" />
+                </MessageAction>
+              </MessageActions>
             </Message>
           );
         })}
