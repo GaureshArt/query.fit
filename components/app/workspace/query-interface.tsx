@@ -26,6 +26,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, Database, BarChart3 } from "lucide-react";
+import ChartBlock from "./chart-block";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
@@ -34,7 +35,6 @@ export default function QueryInterface() {
   const { name: userName } = useUserInfo();
 
   const [isQueryPanelOpen, setIsQueryPanelOpen] = useState(false);
-  const [isChartPanelOpen, setIsChartPanelOpen] = useState(false);
 
   const thread = useStream<
     GraphState,
@@ -57,7 +57,7 @@ export default function QueryInterface() {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [thread.messages, isQueryPanelOpen, isChartPanelOpen]);
+  }, [thread.messages, isQueryPanelOpen]);
 
   useEffect(() => {
     if (sessionId) {
@@ -84,10 +84,10 @@ export default function QueryInterface() {
           },
         }),
       ],
-      queryResult:undefined,
-      currentStepIndex:0,
-      queryPlan:undefined,
-      sqlQuery:"",
+      queryResult: undefined,
+      currentStepIndex: 0,
+      queryPlan: undefined,
+      sqlQuery: "",
       dbId: sessionId,
     });
   };
@@ -170,9 +170,8 @@ export default function QueryInterface() {
                         )}
                       >
                         <CodeBlock
-                          code={thread.values.sqlQuery??""}
+                          code={thread.values.sqlQuery ?? ""}
                           language="sql"
-                          
                           onEdit={(sqlQuery: string) => {
                             thread.submit({
                               messages: [
@@ -222,33 +221,12 @@ export default function QueryInterface() {
               </CollapsibleContent>
             </Collapsible>
           )}
-
-          <Collapsible
-            open={isChartPanelOpen}
-            onOpenChange={setIsChartPanelOpen}
-            className="border-b border-zinc-100"
-          >
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full flex justify-between h-8 px-4 text-xs font-semibold bg-orange-50 hover:bg-orange-100"
-              >
-                <span className="flex items-center gap-2">
-                  <BarChart3 className="w-3 h-3" /> Chart Result
-                </span>
-                {isChartPanelOpen ? (
-                  <ChevronDown className="w-3 h-3" />
-                ) : (
-                  <ChevronUp className="w-3 h-3" />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="h-64 bg-white p-4 flex items-center justify-center border-t">
-              <div className="text-zinc-400 text-sm">
-                [ Chart Component Placeholder ]
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          {thread.values.ui && (
+            <ChartBlock
+              chartConfig={thread.values.ui.config}
+              chartData={thread.values.ui.data}
+            />
+          )}
         </div>
         <div
           className={cn(

@@ -84,9 +84,8 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
       });
     case "groq":
       return new ChatGroq({
-        model: "openai/gpt-oss-120b",
+        model: "openai/gpt-oss-20b",
         temperature: 0,
-  
         apiKey: process.env.GROQ_API_KEY,
       });
 

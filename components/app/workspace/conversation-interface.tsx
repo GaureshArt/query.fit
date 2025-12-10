@@ -15,7 +15,7 @@ import { Response } from "@/components/ai-elements/response";
 import { ShimmeringText } from "@/components/external-ui/shimmering-text";
 import { DynamicTable } from "./dynamic-table";
 import { Spinner } from "@/components/ui/spinner";
-import GenerativeUi, { IGenerativeUi } from "@/utils/agent/ui";
+
 import QueryApproveInterrupt from "./query-approve-interrupt";
 import {
   CodeBlock,
@@ -47,13 +47,10 @@ export default function ConversationInterface({
   interrupt,
   name,
   submit,
-
   disapproveSubmit,
   
 }: IConversationInterfaceProps) {
-  const ChartComponent = state.ui?.config?.type
-    ? GenerativeUi[state.ui.config.type]
-    : null;
+  
 
   return (
     <>
@@ -68,17 +65,9 @@ export default function ConversationInterface({
               <ChatBlock messages={state.messages} />
               {isLoading?
                 <>
-                  {/* <div className="flex gap-5 items-center ">
-                    <Spinner />
-                    <ShimmeringText
-                      className="inline-block"
-                      text={
-                        state.queryPlan?.steps[state.currentStepIndex]
-                          ?.ui_message ?? "QueryFit is Thinking"
-                      }
-                    />
-                  </div> */}
+                  
                   <div>
+                    <Spinner />
                     <ChainOfThoughtQueryPlan
                       currentStepIndex={state.currentStepIndex}
                       isThinking={isLoading}
@@ -88,12 +77,7 @@ export default function ConversationInterface({
                 </>:""
               }
 
-              {ChartComponent && (
-                <ChartComponent
-                  chartData={state.ui.data}
-                  config={state.ui.config}
-                />
-              )}
+              
 
               {interrupt && (
                 <QueryApproveInterrupt
