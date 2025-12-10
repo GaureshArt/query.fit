@@ -33,12 +33,12 @@ export default function ChartBlock({
       <Collapsible
         open={isChartPanelOpen}
         onOpenChange={setIsChartPanelOpen}
-        className="border-b border-zinc-100"
+        className="border-b border-zinc-100 rounded-md"
       >
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full flex justify-between h-8 px-4 text-xs font-semibold bg-orange-50 hover:bg-orange-100"
+            className="w-full flex justify-between h-8 px-4 text-xs font-semibold bg-zinc-50 border border-zinc-600 rounded-lg hover:bg-zinc-100"
           >
             <span className="flex items-center gap-2">
               <BarChart3 className="w-3 h-3" /> Chart Result
@@ -50,8 +50,8 @@ export default function ChartBlock({
             )}
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="h-64 bg-white p-4 flex items-center justify-center border-t">
-          <div className="text-zinc-400 text-sm w-full h-full">
+        <CollapsibleContent className=" bg-white p-4 flex items-center justify-center border-t">
+          <div className="text-zinc-400 text-sm w-full ">
             {ChartComponent && (
               <ChartComponent chartData={chartData} config={chartConfig} />
             )}

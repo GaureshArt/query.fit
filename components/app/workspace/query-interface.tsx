@@ -1,5 +1,4 @@
 "use client";
-
 import { cn } from "@/lib/utils";
 import * as z from "zod";
 import { useStream } from "@langchain/langgraph-sdk/react";
@@ -11,30 +10,16 @@ import { useUserInfo } from "@/lib/user-store";
 import ConversationInterface from "./conversation-interface";
 import PromptInput, { formSchema } from "./prompt-input";
 import { toast, Toaster } from "sonner";
-import { useEffect, useState, useRef } from "react";
-import { Message, MessageContent } from "@/components/ai-elements/message";
-import {
-  CodeBlock,
-  CodeBlockCopyButton,
-} from "@/components/ai-elements/code-block";
-import BackBtnSvg from "@/public/app-svgs/back-btn-svg";
-import { Button } from "@/components/ui/button";
-import { DynamicTable } from "./dynamic-table";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Database, BarChart3 } from "lucide-react";
+import { useEffect, useRef } from "react";
+
 import ChartBlock from "./chart-block";
+import QueryResultBlock from "./query-result-block";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
   const { setDbid } = useUserInfo();
   const sessionId = searchParams.get("session-id");
   const { name: userName } = useUserInfo();
-
-  const [isQueryPanelOpen, setIsQueryPanelOpen] = useState(false);
 
   const thread = useStream<
     GraphState,
@@ -44,20 +29,13 @@ export default function QueryInterface() {
     assistantId: "agent",
     messagesKey: "messages",
   });
-
   const { open: isSidebarOpen } = useSidebar();
-  const [showQuery, setShowQuery] = useState<boolean>(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (thread.values.queryResult) setIsQueryPanelOpen(true);
-  }, [thread.values.queryResult]);
-
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [thread.messages, isQueryPanelOpen]);
+  }, [thread.messages]);
 
   useEffect(() => {
     if (sessionId) {
@@ -68,7 +46,6 @@ export default function QueryInterface() {
   if (!sessionId) {
     return <div>Session id is missing . First upload file and try again</div>;
   }
-
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     if (!data.query.trim()) {
       toast.error("Enter valid query");
@@ -136,90 +113,21 @@ export default function QueryInterface() {
           )}
         >
           {thread.values.queryResult && thread.values.sqlQuery && (
-            <Collapsible
-              open={isQueryPanelOpen}
-              onOpenChange={setIsQueryPanelOpen}
-              className="border-b border-zinc-100"
-            >
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full flex justify-between h-8 px-4 text-xs font-semibold bg-purple-50 hover:bg-purple-100"
-                >
-                  <span className="flex items-center gap-2">
-                    <Database className="w-3 h-3" /> Query Result
-                  </span>
-                  {isQueryPanelOpen ? (
-                    <ChevronDown className="w-3 h-3" />
-                  ) : (
-                    <ChevronUp className="w-3 h-3" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-
-              <CollapsibleContent className="max-h-[40vh] overflow-y-auto bg-purple-100 p-2 border-b">
-                <Message
-                  from="queryresult"
-                  className="border rounded-md border-zinc-200 bg-white"
-                >
-                  <MessageContent className="w-full">
-                    {showQuery ? (
-                      <div
-                        className={cn(
-                          "border border-zinc-800 rounded-sm px-2 py-1 min-h-20 text-wrap w-3/4 "
-                        )}
-                      >
-                        <CodeBlock
-                          code={thread.values.sqlQuery ?? ""}
-                          language="sql"
-                          onEdit={(sqlQuery: string) => {
-                            thread.submit({
-                              messages: [
-                                new HumanMessage(
-                                  `Execute this query so dont go to the generate node go directly execute node . sql query: ${sqlQuery}`
-                                ),
-                              ],
-                              sqlQuery,
-                              feedback:
-                                "Go directly to the execute query node.",
-                            });
-                          }}
-                        >
-                          <CodeBlockCopyButton
-                            onCopy={() =>
-                              console.log("Copied code to clipboard")
-                            }
-                            onError={() =>
-                              console.error("Failed to copy code to clipboard")
-                            }
-                          />
-                          <div onClick={() => setShowQuery(false)}>
-                            <BackBtnSvg />
-                          </div>
-                        </CodeBlock>
-                      </div>
-                    ) : (
-                      <Button
-                        className={cn(
-                          "w-40 font-bold text-lg rounded-sm cursor-pointer"
-                        )}
-                        variant={"outline"}
-                        onClick={() => setShowQuery(true)}
-                      >
-                        Show Query
-                      </Button>
-                    )}
-                    <p className="font-semibold mt-2">Query Result:</p>
-                    <div className="w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                      {thread.values.queryResult &&
-                        thread.values.queryResult instanceof Array && (
-                          <DynamicTable data={thread.values.queryResult} />
-                        )}
-                    </div>
-                  </MessageContent>
-                </Message>
-              </CollapsibleContent>
-            </Collapsible>
+            <QueryResultBlock
+              sqlQuery={thread.values.sqlQuery}
+              queryResult={thread.values.queryResult}
+              editSumbit={(sqlQuery: string) => {
+                thread.submit({
+                  messages: [
+                    new HumanMessage(
+                      `Execute this query so dont go to the generate node go directly execute node . sql query: ${sqlQuery}`
+                    ),
+                  ],
+                  sqlQuery,
+                  feedback: "Go directly to the execute query node.",
+                });
+              }}
+            />
           )}
           {thread.values.ui && (
             <ChartBlock
