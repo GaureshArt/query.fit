@@ -1,7 +1,7 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatDeepSeek } from "@langchain/deepseek";
 import { ChatMoonshot } from "@langchain/community/chat_models/moonshot";
-
+import { ChatGroq } from "@langchain/groq";
 import { ChatMistralAI } from "@langchain/mistralai";
 import { ChatOpenAI } from "@langchain/openai";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
@@ -13,8 +13,15 @@ import {
   queryPlannerLlmSchema,
   validatorLlmSchema,
 } from "./model-schema";
+import { tool } from "@langchain/core/tools";
 
-export type ModelProvider = "gemini" | "deepseek" | "mistral" | "openai" | "moonshot";
+export type ModelProvider =
+  | "gemini"
+  | "deepseek"
+  | "mistral"
+  | "openai"
+  | "moonshot"
+  | "groq";
 
 interface ModelConfig {
   provider?: ModelProvider;
@@ -35,7 +42,7 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
   switch (provider) {
     case "gemini":
       return new ChatGoogleGenerativeAI({
-        model:"gemini-2.5-flash",
+        model: "gemini-2.5-flash",
         temperature,
         streaming,
         apiKey: process.env.GOOGLE_API_KEY,
@@ -56,9 +63,7 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
       return new ChatMistralAI({
         model: "mistral-large-2512",
         apiKey: process.env.MISTRAL_API_KEY,
-        temperature:0,
-        
-        
+        temperature: 0,
       });
 
     case "openai":
@@ -71,12 +76,19 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
           baseURL: "https://openrouter.ai/api/v1",
         },
       });
-      case "moonshot":
-          return new ChatMoonshot({
-            apiKey:process.env.MOONSHOT_API_KEY,
-            model:"moonshotai/kimi-k2:free",
-            
-          })
+
+    case "moonshot":
+      return new ChatMoonshot({
+        apiKey: process.env.MOONSHOT_API_KEY,
+        model: "moonshotai/kimi-k2:free",
+      });
+    case "groq":
+      return new ChatGroq({
+        model: "openai/gpt-oss-120b",
+        temperature: 0,
+  
+        apiKey: process.env.GROQ_API_KEY,
+      });
 
     default:
       throw new Error(`❌ Unsupported Provider: ${provider}`);
@@ -87,7 +99,7 @@ export const queryPlannerLlm = initModel({
   temperature: 0,
 }).withStructuredOutput(queryPlannerLlmSchema, {
   name: "planner_output",
-  includeRaw: true,
+  strict:true
 });
 
 export const queryOrchestratorLlm = initModel({

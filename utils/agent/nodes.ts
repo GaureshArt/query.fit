@@ -327,20 +327,17 @@ export const queryPlanner = withFaultTolerance(
   async (state: GraphState, config?: LangGraphRunnableConfig) => {
     const prompt = await QUERY_PLANNER_PROMPT.format({
       tool_registry: JSON.stringify(TOOL_REGISTRY),
+      user_query:state.messages.at(-1)?.content,
+      schema:JSON.stringify(state.schema)
     });
     const res = await queryPlannerLlm.invoke([
       new SystemMessage(prompt),
       ...state.messages,
     ]);
 
-    console.log("THis is queryPlanner:L ", res.raw.content);
-    console.log(
-      "THis is queryPlanner:BUT PArese ",
-      JSON.parse(res.raw.content as string)
-    );
 
     return {
-      queryPlan: res.parsed,
+      queryPlan: res,
       feedback: "Start executing steps now",
       routeDecision: ROUTES.ORCHESTRATOR,
     };

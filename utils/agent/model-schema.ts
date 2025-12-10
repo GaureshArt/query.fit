@@ -1,48 +1,48 @@
 import z from "zod";
 
-export const queryPlannerLlmSchema = z.object({
-  reasoning: z
-    .string()
-    .describe(
-      "Explain why you chose this specific plan and intent based on user context and tool availability."
+  export const queryPlannerLlmSchema = z.object({
+    reasoning: z
+      .string()
+      .describe(
+        "Explain why you chose this specific plan and intent based on user context and tool availability."
+      ),
+    intent: z
+      .enum([
+        "general",
+        "retrieval",
+        "manipulation",
+        "visualization",
+        "multi-step",
+      ])
+      .describe(
+        "Classify the user's intent. Use 'multi-step' if the request involves both chatting and database actions."
+      ),
+    steps: z.array(
+      z.object({
+        step_number: z.number().describe("The execution order number."),
+        tool_name: z
+          .enum([
+            "generateSchema",
+            "generateQuery",
+            "queryPlanner",
+            "executeQuery",
+            "generateChart",
+            "summarizeOutput",
+            "generalChat",
+            "complexQueryApproval",
+          ])
+          .describe("The specific tool from the registry to use."),
+        description: z
+          .string()
+          .describe("Internal technical note on why this tool is used."),
+        ui_message: z
+          .string()
+          .describe(
+            "A user-friendly status message to display on the frontend (e.g., 'Scanning database structure...')."
+          ),
+      })
     ),
-  intent: z
-    .enum([
-      "general",
-      "retrieval",
-      "manipulation",
-      "visualization",
-      "multi-step",
-    ])
-    .describe(
-      "Classify the user's intent. Use 'multi-step' if the request involves both chatting and database actions."
-    ),
-  steps: z.array(
-    z.object({
-      step_number: z.number().describe("The execution order number."),
-      tool_name: z
-        .enum([
-          "generateSchema",
-          "generateQuery",
-          "queryPlanner",
-          "executeQuery",
-          "generateChart",
-          "summarizeOutput",
-          "generalChat",
-          "complexQueryApproval",
-        ])
-        .describe("The specific tool from the registry to use."),
-      description: z
-        .string()
-        .describe("Internal technical note on why this tool is used."),
-      ui_message: z
-        .string()
-        .describe(
-          "A user-friendly status message to display on the frontend (e.g., 'Scanning database structure...')."
-        ),
-    })
-  ),
-});
+  });
 
 export const queryOrchestratorLlmSchema = z.object({
   currentStepIndex: z
