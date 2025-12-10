@@ -100,6 +100,7 @@ React.useEffect(() => {
         </div>
       </SidebarFooter>
       <SidebarRail />
+      
     </Sidebar>
   );
 }

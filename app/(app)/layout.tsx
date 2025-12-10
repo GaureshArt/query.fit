@@ -22,7 +22,7 @@ export default async function Layout({
               <SidebarTrigger />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 px-4 py-2 ">
+          <div className="flex flex-1 flex-col gap-4 px-4 py-2 fixed w-full h-full  ">
             {children}
           </div>
         </SidebarInset>

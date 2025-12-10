@@ -6,7 +6,7 @@ import {
 } from "@/components/ai-elements/message";
 import { cn } from "@/lib/utils";
 import { BaseMessage } from "@langchain/core/messages";
-import { CopyIcon, RefreshCcwIcon } from "lucide-react";
+import { CopyIcon, } from "lucide-react";
 export interface IChatBlockProps {
   messages: BaseMessage[];
 }

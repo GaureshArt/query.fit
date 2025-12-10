@@ -39,7 +39,7 @@ interface IConversationInterfaceProps {
   submit: () => void;
   disapproveSubmit: () => void;
   name: string;
-  editQuerySubmit: (newSql: string) => void;
+  
 }
 export default function ConversationInterface({
   state,
@@ -49,9 +49,8 @@ export default function ConversationInterface({
   submit,
 
   disapproveSubmit,
-  editQuerySubmit,
+  
 }: IConversationInterfaceProps) {
-  const [showQuery, setShowQuery] = useState<boolean>(false);
   const ChartComponent = state.ui?.config?.type
     ? GenerativeUi[state.ui.config.type]
     : null;
@@ -104,64 +103,7 @@ export default function ConversationInterface({
                 />
               )}
 
-              {state.queryResult && state.sqlQuery && (
-                <>
-                  <Message
-                    from="queryresult"
-                    className="border rounded-md border-zinc-200"
-                  >
-                    <MessageContent className="w-full">
-                      {showQuery ? (
-                        <div
-                          className={cn(
-                            "border border-zinc-800 rounded-sm px-2 py-1 min-h-20 text-wrap w-3/4 "
-                          )}
-                        >
-                          <CodeBlock
-                            code={state.sqlQuery}
-                            language="sql"
-                            className=" text-wrap "
-                            onEdit={(newSql) => {
-                              editQuerySubmit(newSql);
-                            }}
-                          >
-                            <CodeBlockCopyButton
-                              onCopy={() =>
-                                console.log("Copied code to clipboard")
-                              }
-                              onError={() =>
-                                console.error(
-                                  "Failed to copy code to clipboard"
-                                )
-                              }
-                            />
-                            <div onClick={() => setShowQuery(false)}>
-                              <BackBtnSvg />
-                            </div>
-                          </CodeBlock>
-                        </div>
-                      ) : (
-                        <Button
-                          className={cn(
-                            "w-40 font-bold text-lg rounded-sm cursor-pointer"
-                          )}
-                          variant={"outline"}
-                          onClick={() => setShowQuery(true)}
-                        >
-                          Show Query
-                        </Button>
-                      )}
-                      <p className="font-semibold">Query Result:</p>
-                      <div className="w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        {state.queryResult &&
-                          state.queryResult instanceof Array && (
-                            <DynamicTable data={state.queryResult} />
-                          )}
-                      </div>
-                    </MessageContent>
-                  </Message>
-                </>
-              )}
+              
             </>
           )}
         </ConversationContent>

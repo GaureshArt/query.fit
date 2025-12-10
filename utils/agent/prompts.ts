@@ -49,7 +49,6 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
 
         <scenario type="General Chat">
             User: ("Hello, how are you?") OR ("Hello") OR ("What can you do for me?")
-            
             steps: [generalChat]
         </scenario>
 
@@ -130,6 +129,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
         3. Do NOT add extra words, explanations, comments, or formatting.
         4. summarizeOutput must always be the FINAL step for DB or chart actions.
         5. For purely conversational queries, DO NOT involve any DB tools.
+        6.STEPS SHOULD NOT BE EMPTY AT ANY COST
     </instructions>
 
 </planner_node>
