@@ -99,7 +99,6 @@ export const queryPlannerLlm = initModel({
   temperature: 0,
 }).withStructuredOutput(queryPlannerLlmSchema, {
   name: "planner_output",
-  strict:true
 });
 
 export const queryOrchestratorLlm = initModel({

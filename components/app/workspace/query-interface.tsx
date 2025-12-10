@@ -84,6 +84,10 @@ export default function QueryInterface() {
           },
         }),
       ],
+      queryResult:undefined,
+      currentStepIndex:0,
+      queryPlan:undefined,
+      sqlQuery:"",
       dbId: sessionId,
     });
   };
