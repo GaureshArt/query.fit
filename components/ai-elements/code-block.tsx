@@ -127,7 +127,7 @@ export const CodeBlock = ({
         className={cn(
           // REMOVED: overflow-hidden (it can sometimes hide dropdowns/popovers if you add them later)
           // ADDED: h-fit to ensure container grows
-          "group relative w-full rounded-md border bg-background text-foreground h-fit",
+          "group relative w-full rounded-md border bg-background text-purple-300 h-fit",
           className
         )}
         {...props}

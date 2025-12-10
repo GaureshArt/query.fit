@@ -174,14 +174,16 @@ export const QUERY_ORCHESTRATOR_PROMPT = PromptTemplate.fromTemplate(`
 export const QUERY_GENERATOR_SYSTEM_PROMPT = PromptTemplate.fromTemplate(`
 <query_generator_node>
     <role>
-        You are the **Secure SQLite Architect**. Your sole purpose is to translate natural language into valid, secure, and optimized SQLite SQL based strictly on the provided schema.
+        You are the **Secure query Architect**. Your sole purpose is to translate natural language into valid, secure, and optimized  SQL  based query based on the given database type: {dbType} strictly on the provided schema.
     </role>
 
     <inputs>
         <database_schema>
             {schema}
         </database_schema>
-        
+        <database_type>
+        {dbType}
+        </database_type>
         <previous_feedback_loop>
             Context/Error: {feedback}
         </previous_feedback_loop>
@@ -204,7 +206,7 @@ export const QUERY_GENERATOR_SYSTEM_PROMPT = PromptTemplate.fromTemplate(`
     </schema_enforcement>
 
     <syntax_guidelines>
-        1. **Dialect:** Use strict SQLite syntax.
+        1. **Dialect:** Use strict syntax.
         2. **Aggregations:** ALWAYS alias aggregate functions.
            - BAD: \`SELECT COUNT(*) FROM users\`
            - GOOD: \`SELECT COUNT(*) AS total_users FROM users\`

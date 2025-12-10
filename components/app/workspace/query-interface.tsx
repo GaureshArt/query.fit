@@ -166,9 +166,9 @@ export default function QueryInterface() {
                         )}
                       >
                         <CodeBlock
-                          code={thread.values.sqlQuery}
+                          code={thread.values.sqlQuery??""}
                           language="sql"
-                          className=" text-wrap "
+                          
                           onEdit={(sqlQuery: string) => {
                             thread.submit({
                               messages: [

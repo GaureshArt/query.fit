@@ -148,10 +148,12 @@ export const generateSchema = withFaultTolerance(async (state: GraphState) => {
 });
 
 export const generateQuery = withFaultTolerance(async (state: GraphState) => {
+  
   const prompt = await QUERY_GENERATOR_SYSTEM_PROMPT.format({
     query: state.messages.at(-1)?.content,
     feedback: state.feedback,
     schema: state.schema,
+    dbType:state.dbType
   });
 
   const res = await queryGeneratorLlm.invoke([
