@@ -28,7 +28,7 @@ export default function QueryResultBlock({sqlQuery,queryResult,editSumbit}:IQuer
               <CollapsibleTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full flex justify-between h-8 px-4 text-xs font-semibold bg-purple-50 hover:bg-purple-100"
+                  className={cn("w-full flex justify-between cursor-pointer h-8 px-4 text-xs font-semibold bg-zinc-50 hover:bg-zinc-100 border border-zinc-700 rounded-lg", isQueryPanelOpen?"border-b-0 rounded-b-none":"")}
                 >
                   <span className="flex items-center gap-2">
                     <Database className="w-3 h-3" /> Query Result
@@ -41,10 +41,10 @@ export default function QueryResultBlock({sqlQuery,queryResult,editSumbit}:IQuer
                 </Button>
               </CollapsibleTrigger>
 
-              <CollapsibleContent className="max-h-[40vh] overflow-y-auto bg-purple-100 p-2 border-b">
+              <CollapsibleContent className="max-h-[40vh] overflow-y-auto border rounded-lg rounded-t-none border-zinc-700 border-t-0 bg-white">
                 <Message
                   from="queryresult"
-                  className="border rounded-md border-zinc-200 bg-white"
+                  className=""
                 >
                   <MessageContent className="w-full">
                     {showQuery ? (
