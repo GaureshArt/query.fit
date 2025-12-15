@@ -86,6 +86,7 @@ export default function QueryInterface() {
           )}
         >
           <ConversationInterface
+          suggestPillSubmit={onSubmit}
             messages={thread.messages as BaseMessage[]}
             state={thread.values}
             isLoading={thread.isLoading}

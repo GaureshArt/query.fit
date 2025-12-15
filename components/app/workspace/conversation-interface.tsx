@@ -35,37 +35,34 @@ interface IConversationInterfaceProps {
   state: GraphState;
   messages: BaseMessage[];
   isLoading: boolean;
+  suggestPillSubmit: (data: { query: string }) => void;
   interrupt: Interrupt<{ id: string; value: string }> | undefined;
   submit: () => void;
   disapproveSubmit: () => void;
   name: string;
-  
 }
 export default function ConversationInterface({
   state,
   isLoading,
   interrupt,
+  suggestPillSubmit,
   name,
   submit,
   disapproveSubmit,
-  
 }: IConversationInterfaceProps) {
-  
-
   return (
     <>
       <Conversation>
         <ConversationContent className="w-auto max-w-full">
           {!state.messages?.length ? (
             <ConversationEmptyState
-              children={<EmptyStateChatInterface username={name} />}
+              children={<EmptyStateChatInterface username={name} submit={suggestPillSubmit} />}
             />
           ) : (
             <>
               <ChatBlock messages={state.messages} />
-              {isLoading?
+              {isLoading ? (
                 <>
-                  
                   <div>
                     <Spinner />
                     <ChainOfThoughtQueryPlan
@@ -74,10 +71,10 @@ export default function ConversationInterface({
                       plan={state.queryPlan}
                     />
                   </div>
-                </>:""
-              }
-
-              
+                </>
+              ) : (
+                ""
+              )}
 
               {interrupt && (
                 <QueryApproveInterrupt
@@ -86,8 +83,6 @@ export default function ConversationInterface({
                   disapproveSubmit={disapproveSubmit}
                 />
               )}
-
-              
             </>
           )}
         </ConversationContent>

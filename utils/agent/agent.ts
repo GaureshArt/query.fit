@@ -1,5 +1,6 @@
 import { MemorySaver, StateGraph } from "@langchain/langgraph";
 import { GraphState, graphState } from "./state";
+import fs from "node:fs";
 import {
   complexQueryApproval,
   executeQuery,
@@ -66,6 +67,7 @@ const QueryFitAgent = new StateGraph(graphState)
     generateQuery:"generateQuery"
   })
   .compile({ checkpointer ,name:"QueryFit"});
+
 
 export default QueryFitAgent;
 
