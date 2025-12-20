@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🧠 Query.fit — AI-Native Database Assistant.
 
-## Getting Started
+Query.fit is an AI-powered database assistant that allows users to query structured databases using natural language.
+It converts user intent into safe SQL queries, executes them, and optionally visualizes results using charts — with human-in-the-loop safeguards for sensitive operations.
 
-First, run the development server:
+Built to explore real-world challenges in AI agents, database safety, and LLM orchestration.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🚨 Problem Statement
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Querying databases requires:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+SQL knowledge
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Awareness of schema
 
-## Learn More
+Caution around destructive queries
 
-To learn more about Next.js, take a look at the following resources:
+Existing AI tools often:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Execute unsafe queries
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Store user data irresponsibly
 
-## Deploy on Vercel
+Lack clear guardrails
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Query.fit focuses on correctness, safety, and explainability over blind automation.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+🏗️ Architecture Overview
+
+High-level flow:
+
+User asks a question in natural language
+
+LangGraph-based agent analyzes intent
+
+Query is generated and validated
+
+Risky queries require Human-in-the-Loop approval
+
+Results are returned as:
+
+Table output
+
+Optional chart (bar / line / pie)
+
+Persistent memory is intentionally avoided to protect sensitive database information.
+
+![Query.fit Architecture](./image.png)
+
+🤖 Why LangGraph?
+
+LangGraph is used to:
+
+Model agent workflows as a graph
+
+Route decisions between:
+
+Query generation
+
+Validation
+
+HITL approval
+
+Visualization
+
+Prevent uncontrolled LLM execution
+
+This allows deterministic control over non-deterministic models.
+
+🔐 Security & Safety Decisions
+❌ No Persistent Chat Memory
+
+Database conversations may contain sensitive data
+
+Storing history increases risk
+
+Session-based, ephemeral memory is used instead
+
+🛑 Guardrails
+
+Destructive queries (DELETE, DROP, UPDATE) are blocked
+
+HITL approval required for risky operations
+
+
+
+📊 Chart Generation
+
+Query.fit can automatically generate:
+
+Bar charts
+
+Line charts
+
+Pie charts
+
+Charts are only generated when the query result is suitable, avoiding misleading visualizations.
+
+
+🧠 Key Learnings
+
+AI agents need constraints, not autonomy
+
+HITL is essential for database-related AI systems
+
+Not all problems benefit from persistent memory
+
+System design matters more than model choice
+
+
+🛠️ Tech Stack
+
+TypeScript
+
+LangGraph
+
+LangChain
+
+Supabase
+
+SQL (multiple DB support)
+
+Charting library (bar / line / pie)
+
+🎯 Who Is This For?
+
+Recruiters evaluating AI/LLM engineers
+
+Engineers interested in safe AI agents
+
+Anyone exploring database + LLM integrations
+
+Done > perfect.
