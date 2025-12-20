@@ -1,133 +1,122 @@
-🧠 Query.fit — AI-Native Database Assistant.
+# 🧠 Query.fit  
+### AI-Native Database Assistant
 
-Query.fit is an AI-powered database assistant that allows users to query structured databases using natural language.
-It converts user intent into safe SQL queries, executes them, and optionally visualizes results using charts — with human-in-the-loop safeguards for sensitive operations.
 
-Built to explore real-world challenges in AI agents, database safety, and LLM orchestration.
+![TypeScript](https://img.shields.io/badge/TypeScript-blue)
+![LangGraph](https://img.shields.io/badge/LangGraph-Agentic)
+![Human-in-the-Loop](https://img.shields.io/badge/HITL-Enabled-critical)
+![Security](https://img.shields.io/badge/Security-First-important)
+ 
+Query.fit is an **AI-powered database assistant** that allows users to query structured databases using **natural language**.
 
-🚨 Problem Statement
+It converts user intent into **safe SQL queries**, executes them, and optionally visualizes results using charts — with **Human-in-the-Loop (HITL)** safeguards for sensitive operations.
+
+> Built to explore real-world challenges in AI agents, database safety, and LLM orchestration.
+
+---
+
+## 🚨 Problem Statement
 
 Querying databases requires:
+- SQL knowledge  
+- Awareness of schema  
+- Caution around destructive queries  
 
-SQL knowledge
+Most existing AI tools:
+- Execute unsafe queries  
+- Store user data irresponsibly  
+- Lack proper guardrails  
 
-Awareness of schema
+**Query.fit prioritizes correctness, safety, and explainability over blind automation.**
 
-Caution around destructive queries
+---
 
-Existing AI tools often:
+## 🏗️ Architecture Overview
 
-Execute unsafe queries
+### High-Level Flow
 
-Store user data irresponsibly
+1. User asks a question in natural language  
+2. LangGraph-based agent analyzes intent  
+3. SQL query is generated and validated  
+4. Risky queries require **Human-in-the-Loop approval**  
+5. Results are returned as:
+   - Table output  
+   - Optional chart (bar / line / pie)
 
-Lack clear guardrails
+> Persistent memory is intentionally avoided to protect sensitive database information.
 
-Query.fit focuses on correctness, safety, and explainability over blind automation.
+### Architecture Diagram
 
-🏗️ Architecture Overview
+<img src="image.png" width="700" />
 
-High-level flow:
+---
 
-User asks a question in natural language
-
-LangGraph-based agent analyzes intent
-
-Query is generated and validated
-
-Risky queries require Human-in-the-Loop approval
-
-Results are returned as:
-
-Table output
-
-Optional chart (bar / line / pie)
-
-Persistent memory is intentionally avoided to protect sensitive database information.
-
-![Query.fit Architecture](./image.png)
-
-🤖 Why LangGraph?
+## 🤖 Why LangGraph?
 
 LangGraph is used to:
+- Model agent workflows as a **directed graph**
+- Route decisions between:
+  - Query generation  
+  - Validation  
+  - HITL approval  
+  - Visualization  
+- Prevent uncontrolled LLM execution  
 
-Model agent workflows as a graph
+This enables **deterministic control over non-deterministic models**.
 
-Route decisions between:
+---
 
-Query generation
+## 🔐 Security & Safety Decisions
 
-Validation
+### ❌ No Persistent Chat Memory
+- Database conversations may contain sensitive data  
+- Storing history increases risk  
+- Session-based, ephemeral memory is used instead  
 
-HITL approval
+### 🛑 Guardrails
+- Destructive queries (`DELETE`, `DROP`, `UPDATE`) are blocked  
+- HITL approval is required for risky operations  
 
-Visualization
+---
 
-Prevent uncontrolled LLM execution
-
-This allows deterministic control over non-deterministic models.
-
-🔐 Security & Safety Decisions
-❌ No Persistent Chat Memory
-
-Database conversations may contain sensitive data
-
-Storing history increases risk
-
-Session-based, ephemeral memory is used instead
-
-🛑 Guardrails
-
-Destructive queries (DELETE, DROP, UPDATE) are blocked
-
-HITL approval required for risky operations
-
-
-
-📊 Chart Generation
+## 📊 Chart Generation
 
 Query.fit can automatically generate:
+- Bar charts  
+- Line charts  
+- Pie charts  
 
-Bar charts
+Charts are generated **only when the query result is suitable**, preventing misleading visualizations.
 
-Line charts
+---
 
-Pie charts
+## 🧠 Key Learnings
 
-Charts are only generated when the query result is suitable, avoiding misleading visualizations.
+- AI agents need **constraints**, not autonomy  
+- HITL is essential for database-related AI systems  
+- Not all problems benefit from persistent memory  
+- System design matters more than model choice  
 
+---
 
-🧠 Key Learnings
+## 🛠️ Tech Stack
 
-AI agents need constraints, not autonomy
+- TypeScript  
+- LangGraph  
+- LangChain  
+- Supabase  
+- SQL (multi-database support)  
+- Charting (bar / line / pie)
 
-HITL is essential for database-related AI systems
+---
 
-Not all problems benefit from persistent memory
+## 🎯 Who Is This For?
 
-System design matters more than model choice
+- Recruiters evaluating **AI / LLM engineers**  
+- Engineers interested in **safe AI agents**  
+- Developers exploring **database + LLM integrations**
 
+---
 
-🛠️ Tech Stack
-
-TypeScript
-
-LangGraph
-
-LangChain
-
-Supabase
-
-SQL (multiple DB support)
-
-Charting library (bar / line / pie)
-
-🎯 Who Is This For?
-
-Recruiters evaluating AI/LLM engineers
-
-Engineers interested in safe AI agents
-
-Anyone exploring database + LLM integrations
-
-Done > perfect.
+> **Done > Perfect**  
+> This project focuses on engineering tradeoffs, not feature bloat.
