@@ -1,4 +1,4 @@
-import NavGrid from "@/components/setting/nav-grid";
+import NavGrid from "@/components/app/setting/nav-grid";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";

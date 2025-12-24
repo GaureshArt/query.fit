@@ -29,7 +29,7 @@ export default function PlusSvg({opacity = 0.4}:IPlusSvgProps) {
       </g>
     </svg>
     <svg width="32" height="32" viewBox="0 0 48 48" className={cn(
-        "stroke-zinc-900 absolute -left-4 -bottom-4"
+        "stroke-zinc-900 absolute -left-4 -bottom-10"
     )}>
       <g fill="none" opacity={opacity}>
         <path d="M48 23.5L0 23.5" ></path>
@@ -39,7 +39,7 @@ export default function PlusSvg({opacity = 0.4}:IPlusSvgProps) {
       </g>
     </svg>
     <svg width="32" height="32" viewBox="0 0 48 48" className={cn(
-        "stroke-zinc-900 absolute -right-4 -bottom-4"
+        "stroke-zinc-900 absolute -right-4 -bottom-10"
     )}>
       <g fill="none" opacity={opacity}>
         <path d="M48 23.5L0 23.5" ></path>

@@ -1,9 +1,8 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "../ui/sidebar";
+import { useSidebar } from "../../ui/sidebar";
 import { SETTINGS_SUB_NAV } from "@/constants/setting-sub-nav";
 import Link from "next/link";
-import QuerySvg from "@/public/setting-svgs/query-svg";
 
 export default function NavGrid() {
   const { open: isSidebarOpen } = useSidebar();
@@ -19,7 +18,7 @@ export default function NavGrid() {
         {SETTINGS_SUB_NAV.map((nav) => (
           <div
             key={nav.id}
-            className="border border-zinc-500 rounded-lg px-4 py-2 w-90 h-28"
+            className="border border-zinc-500 rounded  px-4 py-2 w-85 h-28 shadow-2xs"
           >
             <Link href={nav.link} className="flex gap-2">
               <nav.logo />
