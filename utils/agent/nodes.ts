@@ -429,14 +429,15 @@ export const summarizeOutput = withFaultTolerance(async (state: GraphState) => {
   ]);
 console.log("res: ",res.content,"\n")
   return {
-   messages: [
-      new AIMessageChunk({
-        ...res,
-        additional_kwargs:{
-          node:"general_chat"
-        }
-      })
-    ],
+  messages: [
+  new AIMessage({
+    content: res.content,
+    response_metadata: {
+      node: "general_chat",
+    },
+  }),
+]
+,
     routeDecision: ROUTES.END,
     feedback: "",
     queryPlan: undefined,
@@ -457,14 +458,15 @@ export const generalChat = withFaultTolerance(async (state: GraphState) => {
 console.log("res: ",res.content,"\n")
   return {
     routeDecision: ROUTES.END,
-    messages: [
-      new AIMessageChunk({
-        ...res,
-        additional_kwargs:{
-          node:"general_chat"
-        }
-      })
-    ],
+   messages: [
+  new AIMessage({
+    content: res.content,
+    response_metadata: {
+      node: "general_chat",
+    },
+  }),
+]
+,
     feedback: "",
     queryPlan: undefined,
     currentStepIndex: 0,

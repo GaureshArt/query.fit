@@ -44,7 +44,7 @@ export const QUERY_PLANNER_PROMPT = PromptTemplate.fromTemplate(`
         </scenario>
         <scenario type="Visualization">
             User: "Graph the sales"
-            Plan: ... -> [generateChart] -> [summarizeOutput]
+            Plan: [generateSchema] -> [generateQuery] -> [executeQuery] -> [generateChart] -> [summarizeOutput]
         </scenario>
     </planning_logic>
 

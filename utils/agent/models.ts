@@ -51,7 +51,7 @@ export function initModel(config: ModelConfig = {}): BaseChatModel {
 
     case "deepseek":
       return new ChatDeepSeek({
-        model: "deepseek/deepseek-prover-v2",
+        model: "deepseek/deepseek-chat-v3.1",
         temperature,
         apiKey: process.env.DEEPSEEK_API_KEY,
         configuration: {

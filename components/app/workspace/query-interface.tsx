@@ -14,6 +14,7 @@ import { useEffect, useRef } from "react";
 
 import ChartBlock from "./chart-block";
 import QueryResultBlock from "./query-result-block";
+import { client, thread as _thread  } from "@/utils/agent/thread";
 
 export default function QueryInterface() {
   const searchParams = useSearchParams();
@@ -31,11 +32,11 @@ export default function QueryInterface() {
   });
   const { open: isSidebarOpen } = useSidebar();
   const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [thread.messages]);
+  // useEffect(() => {
+  //   if (scrollRef.current) {
+  //     scrollRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [thread.messages]);
 
   useEffect(() => {
     if (sessionId) {

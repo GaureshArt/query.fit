@@ -7,6 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BaseMessage } from "@langchain/core/messages";
 import { CopyIcon, } from "lucide-react";
+import MarkdownRenderer from "./markdown-renderer";
 export interface IChatBlockProps {
   messages: BaseMessage[];
 }
@@ -22,9 +23,10 @@ export default function ChatBlock({ messages }: IChatBlockProps) {
               key={index}
             >
               <MessageContent className={cn("")}>
+                
                 {typeof message.content === "string"
-                  ? message.content
-                  : message.content.map((m) => m.text).join(" ")}
+                  ? <MarkdownRenderer content={message.content}/>
+                  :<MarkdownRenderer content={ message.content.map((m) => m.text).join(" ")}/>}
               </MessageContent>
               <MessageActions>
                 <MessageAction

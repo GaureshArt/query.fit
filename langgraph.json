@@ -3,14 +3,14 @@
   "dockerfile_lines": [],
   "dependencies": ["."],
   "graphs": {
-    "agent":{
+    "agent": {
       "path": "./utils/agent/agent.ts:default",
-      "stream_mode": ["messages","values"]
-      
+      "stream_mode": ["messages", "values"],
+      "checkpoint": true
     }
   },
-   "ui": {
+  "ui": {
     "agent": "./utils/agent/ui.tsx"
   },
-  "env":"./.env"
+  "env": "./.env"
 }

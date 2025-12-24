@@ -1,5 +1,6 @@
 import { MemorySaver, StateGraph } from "@langchain/langgraph";
 import { GraphState, graphState } from "./state";
+// import {store,checkpointer} from "@/utils/agent/memory"
 import fs from "node:fs";
 import {
   complexQueryApproval,
@@ -16,7 +17,10 @@ import {
 } from "./nodes";
 
 const checkpointer = new MemorySaver();
-
+// (async()=>{
+//   await checkpointer.setup();
+//   await store.setup();
+// })()
 const QueryFitAgent = new StateGraph(graphState)
   .addNode("queryPlanner", queryPlanner)
   .addNode("orchestrator", orchestrator)
@@ -66,7 +70,7 @@ const QueryFitAgent = new StateGraph(graphState)
     orchestrator:"orchestrator",
     generateQuery:"generateQuery"
   })
-  .compile({ checkpointer ,name:"QueryFit"});
+  .compile({ checkpointer, name:"QueryFit"});
 
 
 export default QueryFitAgent;
