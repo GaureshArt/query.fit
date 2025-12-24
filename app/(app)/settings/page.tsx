@@ -1,29 +1,23 @@
+import NavGrid from "@/components/setting/nav-grid";
+import { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
-import { createClient } from "@/utils/supabase/server"
+export default async function Page() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-export default async function Page(){
-    const supabase = await createClient();
-    const user = await supabase.auth.getUser();
-    if(!user.data.user?.id){
-        console.log(user.data)
-        return <>
-        user not log in
-        </>
-    }
+  if (!user) {
+    redirect("/");
+  }
 
-    const { data: subscription, error } = await supabase
-    .from('subscriptions')
-    .select('credits_remaining') 
-    .eq('user_id', user.data.user.id)    
-    .single();
-    return (
-        <>
-
-        <div className="bg-red-300">
-
-        user log in {user.data.user.email}
-        user credits data: {subscription?.credits_remaining}
-        </div>
-        </>
-    )
+  return (
+    <>
+     <div className={cn(" w-full h-full px-4 py-2","flex items-center justify-center")}>
+      <NavGrid/>
+     </div>
+    </>
+  );
 }
