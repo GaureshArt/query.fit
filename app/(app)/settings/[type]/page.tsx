@@ -1,5 +1,7 @@
+import BackBtn from "@/components/app/setting/back-btn";
 import { SETTINGS_COMPONENTS } from "@/components/app/setting/sub-nav-registry";
 import { cn } from "@/lib/utils";
+
 
 export default function Page({params}:{params:{type:string}}) {
 
@@ -7,10 +9,12 @@ export default function Page({params}:{params:{type:string}}) {
     if(!Component){
         return <>No special</>
     }
+    
     return (
         <>
-        <div className={cn("flex justify-center items-center w-full h-full")}>
 
+        <div className={cn("flex  justify-center items-center w-full h-full")}>
+        <BackBtn/>
         {Component}
         </div>
         </>
