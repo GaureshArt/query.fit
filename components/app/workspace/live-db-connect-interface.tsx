@@ -29,11 +29,14 @@ import { useMutation } from "@tanstack/react-query";
 import { liveDbConnectSchema } from "@/types/livedbconnect.types";
 import { useRouter } from "next/navigation";
 import { useUserInfo } from "@/lib/user-store";
+import { useEffect } from "react";
 
 
 export default function LiveDbConnectInterface() {
-const router = useRouter()
-const {setDbType} = useUserInfo()
+  const router = useRouter();
+  const {setDbType} = useUserInfo();
+  const {dbid}  = useUserInfo();
+
   const form = useForm<z.infer<typeof liveDbConnectSchema>>({
     resolver: zodResolver(liveDbConnectSchema),
     defaultValues: {
@@ -64,6 +67,10 @@ const {setDbType} = useUserInfo()
     console.log("Submitting:", data);
     mutate.mutate(data)
   };
+ useEffect(() => {
+  if (!dbid) return;
+  router.replace(`/workspace/query?session-id=${dbid}`);
+}, [dbid]);
 
   return (
     <div className={cn("w-full h-90")}>

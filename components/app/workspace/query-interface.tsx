@@ -29,6 +29,7 @@ export default function QueryInterface() {
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
+    
   });
   const { open: isSidebarOpen } = useSidebar();
   const scrollRef = useRef<HTMLDivElement>(null);
