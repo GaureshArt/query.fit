@@ -10,7 +10,7 @@ import { useUserInfo } from "@/lib/user-store";
 import ConversationInterface from "./conversation-interface";
 import PromptInput, { formSchema } from "./prompt-input";
 import { toast, Toaster } from "sonner";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ChartBlock from "./chart-block";
 import QueryResultBlock from "./query-result-block";
@@ -21,7 +21,7 @@ export default function QueryInterface() {
   const { setDbid } = useUserInfo();
   const sessionId = searchParams.get("session-id");
   const { name: userName } = useUserInfo();
-
+  const [threadId,setThreadId] = useState(_thread.thread_id);
   const thread = useStream<
     GraphState,
     { InterruptType: { id: string; value: string } }
@@ -29,6 +29,9 @@ export default function QueryInterface() {
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
+     reconnectOnMount: () => window.localStorage,
+    threadId:threadId,
+    onThreadId:setThreadId
     
   });
   const { open: isSidebarOpen } = useSidebar();

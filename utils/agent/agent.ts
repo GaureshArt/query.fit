@@ -1,4 +1,4 @@
-import { MemorySaver, StateGraph } from "@langchain/langgraph";
+import { InMemoryStore, MemorySaver, StateGraph } from "@langchain/langgraph";
 import { GraphState, graphState } from "./state";
 // import {store,checkpointer} from "@/utils/agent/memory"
 import fs from "node:fs";
@@ -17,6 +17,7 @@ import {
 } from "./nodes";
 
 const checkpointer = new MemorySaver();
+const store = new InMemoryStore();
 // (async()=>{
 //   await checkpointer.setup();
 //   await store.setup();
@@ -70,7 +71,7 @@ const QueryFitAgent = new StateGraph(graphState)
     orchestrator:"orchestrator",
     generateQuery:"generateQuery"
   })
-  .compile({ checkpointer, name:"QueryFit"});
+  .compile({ checkpointer,store, name:"QueryFit"});
 
 
 export default QueryFitAgent;
