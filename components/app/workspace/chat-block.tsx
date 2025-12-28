@@ -22,7 +22,7 @@ export default function ChatBlock({ messages }: IChatBlockProps) {
               from={message.type === "human" ? "user" : "assistant"}
               key={index}
             >
-              <MessageContent className={cn("")}>
+              <MessageContent className={cn("text-lg font-medium")}>
                 
                 {typeof message.content === "string"
                   ? <MarkdownRenderer content={message.content}/>
